@@ -22,6 +22,13 @@ int getaline(char line[], int maxchars)
     int c;
     int i;
     for(i=0; i<=maxchars&&((c=getchar())!=EOF)&&(c!='\n'); i++){
+        if (c=='\t'){
+            c=' ';
+            while((i+1)%TABSTOP != 0){
+                line[i]=c;
+                i++;
+            }
+        }
         line[i]=c;
     }
     if (c=='\n'){
