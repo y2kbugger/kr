@@ -3,23 +3,31 @@
 /* Exercise 1-20. Write a program detab that replaces tabs in the input with the proper number of blanks to space to the next tab stop. Assume a fixed set of tab stops, say every n columns. Should n be a variable or a symbolic parameter? */
 
 #define MAXLINE 222
+#define TABSTOP 8
 
-void getaline(char line[], int maxchars);
+int getaline(char line[], int maxchars);
 
 int main()
 {
-    putchar('h');
     char s[MAXLINE];
-    getaline(s, MAXLINE);
-    putchar('h');
+    int len;
+    while((len = getaline(s, MAXLINE)) > 0) {
+        printf("%s",s);
+    }
     return 0;
 }
 
-void getaline(char line[], int maxchars)
+int getaline(char line[], int maxchars)
 {
     int c;
     int i;
-    for(i=1; (c=getchar())!=EOF; i++){
-        putchar(c);
+    for(i=0; i<=maxchars&&((c=getchar())!=EOF)&&(c!='\n'); i++){
+        line[i]=c;
     }
+    if (c=='\n'){
+         line[i]=c;
+         ++i;
+    }
+    line[i]='\0';
+    return i;
 }
