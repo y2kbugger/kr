@@ -1,3 +1,4 @@
 program:
-	gcc *.c -o ~/build/out
-	~/build/out < 1-20.test > 1-20.test.out
+	mkdir -p ~/build/1-21/
+	gcc *.c -o ~/build/1-21/out
+	~/build/1-21/out < 1-21.test > 1-21.test.out
