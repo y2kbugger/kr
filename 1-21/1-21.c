@@ -6,7 +6,6 @@
 #define MAXLINE 222
 #define TABSTOP 8
 
-int getaline(char line[], int maxchars);
 int detab(char line[], int maxchars);
 int entab(char line[], int maxchars);
 
@@ -14,8 +13,10 @@ int main()
 {
     char s[MAXLINE];
     int len;
-    while((len = getaline(s, MAXLINE)) > 0) {
-        detab(s, MAXLINE);
+    while(fgets(s, MAXLINE, stdin)) {
+        //detab(s, MAXLINE);
+        //printf("%s",s);
+        entab(s, MAXLINE);
         printf("%s",s);
     }
     return 0;
@@ -49,14 +50,28 @@ int detab(char line[], int maxchars)
 int entab(char line[], int maxchars)
 {
     int c;
-    int i;
-    for(i=0; i<=maxchars&&((c=getchar())!=EOF)&&(c!='\n'); i++){
-        if (c==' '){
-            c='\t';
-            while((i+1)%TABSTOP != 0){
+    int i,j;
+    int consecutive_blanks;
+    j = 0;
+    char linecopy[MAXLINE];
+    detab(line, MAXLINE);
+    strcpy(linecopy, line);
+    for(i=0; i+j<=maxchars&&((c=linecopy[i+j])!=EOF)&&(c!='\n'); i++){
+        consecutive_blanks = 0;
+        while(c==' '){
+            j++;
+            consecutive_blanks++;
+            if((i+j+1)%TABSTOP == 0){
+                line[i]='\t';
                 i++;
+                consecutive_blanks = 0;
             }
-            line[i]=c;
+            c=linecopy[i+j];
+        }
+        for(; consecutive_blanks>0; consecutive_blanks--){
+            line[i]=' ';
+            i++;
+            j--;
         }
         line[i]=c;
     }
@@ -68,17 +83,3 @@ int entab(char line[], int maxchars)
     return i;
 }
 
-int getaline(char line[], int maxchars)
-{
-    int c;
-    int i;
-    for(i=0; i<=maxchars&&((c=getchar())!=EOF)&&(c!='\n'); i++){
-        line[i]=c;
-    }
-    if (c=='\n'){
-         line[i]=c;
-         ++i;
-    }
-    line[i]='\0';
-    return i;
-}
