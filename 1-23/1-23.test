@@ -10,67 +10,56 @@
 #define MAXLINE 222
 #define FOLDLEN 20
 
-int foldline(char line[], int maxchars);
+void removecomments();
 
 int main()
 {
     char s[MAXLINE];
     int len;
-    printf("comment in string /*   lol */");
-    while(fgets(s, MAXLINE, stdin)) {
-        foldline(s, MAXLINE);
-        printf("%s",s);
-    }
+    removecomments();
     return 0;
 }
+
+void deadcode(){
+    printf("%c",'"');
+    printf("comment in string /*   lol */");
+    int foobar;     /* flag for what kind of region */
+                    /* single flag because comments */
+                    /* mutually exclusive. */
+}
+
 void removecomments(){
-    int instring; /* flag for if instring */
-    int incomment;
-    instring = 0;
-    incomment = 0;
-    while((c=getchar())!=EOF)
-}
-int foldline(char line[], int maxchars)
-{
-    int c;
-    int in, out, column;
-    in = out = column = 0;
-    int lastnonblank;
-    lastnonblank = -1;
-    char linecopy[MAXLINE];
-    strcpy(linecopy, line);
-    while(out <= maxchars && ((c=linecopy[in])!='\n')){
-        line[out]=c;
-        if (c=='\t' || c==' '){
-            lastnonblank = out;
+    int parsestate; /* flag for what kind of region we are in.  use
+                     * single flag because comments and strings are
+                     * mutually exclusive.
+                     * -1: normal code
+                     *  0: strings
+                     *  1: comments
+                     * */
+    int c, b;
+    parsestate = -1;
+    b = -1; /* previous c */
+    while((c=getchar())!=EOF){
+        switch (parsestate) {
+            case -1:
+                if(c=='"'&&b!='\\'&&b!='\'')
+                    parsestate = 0;
+                if(c=='*'&&b=='/')
+                    parsestate = 1;
+                break;
+            case 0:
+                if(c=='"'&&b!='\\'&&b!='\'')
+                    parsestate = -1;
+                break;
+            case 1:
+                if(c=='/'&&b=='*')
+                    parsestate=b=c=-1;
+                break;
         }
-        if(c=='\t')
-            while((column)%FOLDLEN != 0){
-                column++;
-            }
-//        printf("%d, %d, %d, %c\n", column, in, lastnonblank, c);
-        if((column)>=FOLDLEN){
-            if(lastnonblank==-1){
-                line[out]='\n';
-                out++;
-                column=0;
-            } else{
-                line[lastnonblank]='\n';
-                column=in-lastnonblank;
-            }
-            lastnonblank = -1;
-        }
-
-        in++;
-        column++;
-        out++;
+        if(parsestate<1 && b!=-1)
+            putchar(b);
+        b = c;
     }
-    if (c=='\n'){
-         line[out]=c;
-         out++;
-    }
-    line[out]='\0';
-    return out;
+    if(parsestate<1 && b!=-1)
+        putchar(b);
 }
-
-
