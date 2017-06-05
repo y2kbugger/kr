@@ -24,6 +24,7 @@ int main()
 
 void deadcode(){
     printf("%c",'"');
+    printf("%c",'{');
     printf("comment in string /*   lol */");
     int foobar;     /* flag for what kind of region */
                     /* single flag because comments */
@@ -35,10 +36,13 @@ void removecomments(){
                      * single flag because comments and strings are
                      * mutually exclusive.
                      * -1: normal code
-                     *  0: strings
+                     *  0: doublequotes
                      *  1: comments
+                     *  2: singlequotes
                      * */
     int c, b;
+    int paren, square, curly;
+    paren=square=curly=0;
     parsestate = -1;
     b = -1; /* previous c */
     while((c=getchar())!=EOF){
@@ -48,6 +52,8 @@ void removecomments(){
                     parsestate = 0;
                 if(c=='*'&&b=='/')
                     parsestate = 1;
+                if(c=='\''&&b!='\\')
+                    parsestate = 2;
                 break;
             case 0:
                 if(c=='"'&&b!='\\'&&b!='\'')
@@ -55,13 +61,60 @@ void removecomments(){
                 break;
             case 1:
                 if(c=='/'&&b=='*')
-                    parsestate=b=c=-1;
+                    parsestate = -1;
+                break;
+            case 2:
+                if(c=='\''&&b!='\\')
+                    parsestate = -1;
                 break;
         }
-        if(parsestate<1 && b!=-1)
-            putchar(b);
         b = c;
+        if (c=='\n')
+            putchar(c);
+        else
+            switch (parsestate) {
+                case -1:
+                    putchar('0');
+                    break;
+                case 0:
+                    putchar('"');
+                    break;
+                case 1:
+                    putchar('*');
+                    break;
+                case 2:
+                    putchar('\'');
+                    break;
+            }
+        if(parsestate>=0)
+            continue;
+
+        switch (c) {
+            case '{':
+                curly++;
+                putchar(c);
+                break;
+            case '}':
+                curly--;
+                putchar(c);
+                break;
+            case '(':
+                paren++;
+                putchar(c);
+                break;
+            case ')':
+                paren--;
+                putchar(c);
+                break;
+            case '[':
+                square++;
+                putchar(c);
+                break;
+            case ']':
+                square--;
+                putchar(c);
+                break;
+        }
     }
-    if(parsestate<1 && b!=-1)
-        putchar(b);
+    printf("{:%d, [%d, (%d", curly, square, paren);
 }
