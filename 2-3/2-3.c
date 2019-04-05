@@ -8,13 +8,18 @@
 
 int htoi(char s[])
 {
-    long value = 0;
+    unsigned long value = 0;
+    unsigned int digitval, place;
     char *c;
-    for (c = s; *c !='\0'; c++)
+    for (c = s; *c != '\0'; c++){}
+    char *onesplace = c;
+    for (c=c-1;  c>=s ; c--)
     {
-        value += *c - 48;
-        putchar(*c);
-        putchar('\n');
+        place=onesplace-c-1;
+        digitval = *c - 48;
+        value += (digitval * (1 << 4*place));
+
+        printf("%d|\t%c:%x\n",place,*c, digitval);
     }
     return value;
 }
@@ -26,9 +31,12 @@ int main()
     /* strcpy(s, "0xFF"); //255 */
     /* int c; */
     /* c = htoi(s); */
-    printf("%s:%x\n", "1", htoi("1"));
-    printf("%s:%x\n", "2", htoi("2"));
-    printf("%s:%x\n", "3", htoi("3"));
-    printf("%s:%x\n", "333", htoi("333"));
-    printf("%s:%x\n", "FF", htoi("FF"));
+    printf("%d\n", 16<<1);
+    printf("\t\t%s:%x\n\n", "1", htoi("1"));
+    printf("\t\t%s:%x\n\n", "2", htoi("2"));
+    printf("\t\t%s:%x\n\n", "2", htoi("2"));
+    printf("\t\t%s:%x\n\n", "20", htoi("20"));
+    printf("\t\t%s:%x\n\n", "3", htoi("3"));
+    printf("\t\t%s:%x\n\n", "333", htoi("333"));
+    printf("\t\t%s:%x\n\n", "FF", htoi("FF"));
 }
