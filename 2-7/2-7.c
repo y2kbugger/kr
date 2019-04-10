@@ -43,13 +43,15 @@ void testit(uint16_t x, int p, int n)
 {
 
     print_binary(x);
-    printf(";%d;%d: ", p,n);
+    printf(":%d:%d\n", p,n);
     print_binary(invert(x,p,n));
-    printf("\n");
+    printf("\n\n");
 }
 
 int main()
 {
     testit(077777, 3, 2);
     testit(077777, 6, 2);
+    testit(0, 6, 2);
+    testit(0xaaaa, 6, 2);
 }
