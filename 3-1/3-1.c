@@ -40,13 +40,15 @@ int binsearch2(int x, int v[], int n)
         mid = (low + high) / 2;
         if (x < v[mid])
             high = mid - 1;
-        else if (x > v[mid])
+        else
             low = mid + 1;
-        else                    /* found match */
-            return mid;
     }
-    return -1;
-    /* no match */
+    if (x == v[mid])
+/* found match */
+        return mid;
+    else
+        /* no match */
+        return -1;
 }
 
 
@@ -99,7 +101,7 @@ void testit(int n)
     int msec;
     diff = clock() - start;
     msec = diff * 1000 / CLOCKS_PER_SEC;
-    printf(" %3d msec", msec);
+    printf(" %4d msec", msec);
 
     /* optimized version */
     start = clock();
@@ -115,7 +117,7 @@ void testit(int n)
     }
     diff = clock() - start;
     msec = diff * 1000 / CLOCKS_PER_SEC;
-    printf(" %3d msec", msec);
+    printf(" %4d msec", msec);
     printf("\n");
 }
 
@@ -128,5 +130,5 @@ int main()
     testit(1000000);
     testit(1000000);
     testit(10000000);
-    /* testit(100000000); */
+    testit(100000000);
 }
