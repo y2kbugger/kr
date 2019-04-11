@@ -3,7 +3,7 @@
 #include <string.h>
 
 /*
- * Exercise 2-7. Write a function rightrot(x,n) that returns the value of the integer x rotated to the right by n bit positions.
+ * Exercise 2-8. Write a function rightrot(x,n) that returns the value of the integer x rotated to the right by n bit positions.
  */
 
 uint16_t rightrot(uint16_t x, int n)
