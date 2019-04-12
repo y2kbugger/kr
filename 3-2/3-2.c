@@ -2,6 +2,7 @@
 #include <limits.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <time.h>
 
 #define TESTREPS 1
@@ -28,12 +29,75 @@ void print_binary(uint16_t byte)
 
 void escape(char s[], char t[])
 {
-    int i;
-    for (i = 0; t[i] != '\0'; i++) {
-        s[i] = t[i];
+    int i = 0, j = 0;
+    for (; t[i] != '\0'; i++) {
+        switch (t[i]) {
+        case '\n':
+            s[j++] = '\\';
+            s[j++] = 'n';
+            break;
+        case '\t':
+            s[j++] = '\\';
+            s[j++] = 't';
+            break;
+        case '\r':
+            s[j++] = '\\';
+            s[j++] = 'r';
+            break;
+        case '\f':
+            s[j++] = '\\';
+            s[j++] = 'f';
+            break;
+        case '\v':
+            s[j++] = '\\';
+            s[j++] = 'v';
+            break;
+        case '\\':
+            s[j++] = '\\';
+            s[j++] = '\\';
+            break;
+        default:
+            s[j++] = t[i];
+            break;
+        }
         /* printf("\n%d:%c", i, t[i]); */
     }
-    s[i] = '\0';
+    s[j++] = '\0';
+}
+
+void unescape(char s[], char t[])
+{
+    int i = 0, j = 0;
+    for (; t[i] != '\0'; i++) {
+        if (t[i] != '\\') {
+            s[j++] = t[i];
+        } else {
+            switch (t[++i]) {
+            case 'n':
+                s[j++] = '\n';
+                break;
+            case 't':
+                s[j++] = '\t';
+                break;
+            case 'r':
+                s[j++] = '\r';
+                break;
+            case 'f':
+                s[j++] = '\f';
+                break;
+            case 'v':
+                s[j++] = '\v';
+                break;
+            case '\\':
+                s[j++] = '\\';
+                break;
+            default:
+                s[j++] = '?';
+                break;
+            }
+        }
+    }
+    s[j++] = '\0';
 }
 
 void testit(char t[])
@@ -43,18 +107,23 @@ void testit(char t[])
     start = clock();
 
     char s[99];
+    char u[99];
     start = clock();
 
-    for (int k = 0; k < TESTREPS; k++) {
+    for (int k = 0; k <= TESTREPS; k++) {
         escape(s, t);
+        unescape(u, s);
     }
-    diff = clock() - start;
-    msec = diff * 1000 / CLOCKS_PER_SEC;
-    printf(" %4d msec", msec);
-    printf(" %s:%s", t, s);
+    /* diff = clock() - start; */
+    /* msec = diff * 1000 / CLOCKS_PER_SEC; */
+    /* printf("\n %4d msec", msec); */
+    printf("\n%s:%s:%s", t, s, u);
 }
 
 int main()
 {
+    printf("\n%s:%s:%s", "in", "escape", "unescaped");
     testit("devo");
+    testit("de\tvo");
+    testit("de\\vo");
 }
