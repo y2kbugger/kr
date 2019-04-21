@@ -14,6 +14,11 @@
  * is, the value of n equal to -(pow(2, WORDSIZE-1). Explain why not.
  * Modify it to print that value correctly, regardless of the machine
  * on which it runs.
+ *
+ *
+ * The line:
+ * n = -n
+ * overflows the int
  */
 
 const char *bit_rep[16] = {
@@ -51,14 +56,16 @@ void reverse(char s[])
 void itoa(int n, char s[])
 {
     int i, sign;
+    long ln;
+    ln = n;
 
-    if ((sign = n) < 0)         /* record sign */
-        n = -n;
+    if ((sign = ln) < 0)         /* record sign */
+        ln = -ln;
     i = 0;
 
     do {                        /* generate digits in reverse order */
-        s[i++] = n % 10 + '0';  /* get next digit */
-    } while ((n /= 10) > 0);    /* delete it */
+        s[i++] = ln % 10 + '0';  /* get next digit */
+    } while ((ln /= 10) > 0);    /* delete it */
     if (sign < 0)
         s[i++] = '-';
     s[i++] = '\0';
@@ -90,6 +97,7 @@ int main()
 
     testit(1);
     testit(1455);
+    testit(-1455);
 
     testit(minint);
 }
