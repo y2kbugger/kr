@@ -85,9 +85,16 @@ void testit(int n)
 int main()
 {
     printf("%s:%s;\n", "in", "out");
-    char ss[255];
-    strcpy(ss, "Hello");
-    reverse(ss);
-    printf("%s;\n", ss);
-    /* testit(155); */
+
+    testit(1);
+    testit(1455);
+    int n = 555;
+
+    printf("highest 1: %ld\n", pow(2, 88));
+
+    testit(sizeof(n));
+    testit(-pow(2, 8 * sizeof(n)));
+    testit(-pow(2, (8 * sizeof(n)) - 1));
+    printf("%d", 8 * sizeof(n));
+    printf("%d", (8 * sizeof(n)) - 1);
 }
