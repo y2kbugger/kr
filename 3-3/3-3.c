@@ -32,39 +32,24 @@ void print_binary(uint16_t byte)
         );
 }
 
-enum expandtype { upper, lower, number, none };
 /* expands shorthand notations like a-z in the string s1 into the equivalent
  * complete list abc...xyz in s2. */
 void expand(char s1[], char s2[])
 {
     int i1 = 0, i2 = 0;
     bool expanding = false;
-    enum expandtype current_exp = none;
-    char last, now, next;
+    char last = '\0', current, next;
     for (i1 = 0; s1[i1] != '\0'; i1++) {
-        last = s1[i1];
-        now = s1[i1 + 1];
-        next = s1[i1 + 2];
+        current = s1[i1];
+        next = s1[i1 + 1];
 
-        if (('a' <= last) && (last <= 'z')
-            && (now == '-')
-            && ('a' <= next) && (next <= 'z')
-            ) {
-            current_exp = lower;
-            i1 += 2;
-            s2[i2++] = 'l';
-
-        } else if (('A' <= last) && (last <= 'Z')
-                   && (now == '-')
-                   && ('A' <= next) && (next <= 'Z')
-            ) {
-            current_exp = lower;
-            i1 += 2;
-            s2[i2++] = 'U';
+        if (s1[i1] == '-') {
+            s2[i2++] = '*';
         } else {
-            current_exp = none;
             s2[i2++] = s1[i1];
         }
+
+        last = current;
     }
     s2[i2++] = '\0';
 }
@@ -80,8 +65,8 @@ void testit(char s1[])
     for (int k = 1; k <= TESTREPS; k++) {
         expand(s1, s2);
     }
-    /* diff = clock() - start; */
-    /* msec = diff * 1000 / CLOCKS_PER_SEC; */
+    diff = clock() - start;
+    msec = diff * 1000 / CLOCKS_PER_SEC;
     /* printf("\n %4d msec", msec); */
     printf(":%s:%s;\n", s1, s2);
 }
@@ -104,6 +89,7 @@ int main()
     testit("A-B");
     testit("A-B");
     testit("a-b-c");
-    testit("a-z0−9");
-    testit("-a-z.");
+    testit("a-z0-9");
+    testit("-a-z");
+    testit("a-Z");
 }
