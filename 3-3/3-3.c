@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
+#include <stdbool.h>
 
 #define TESTREPS 1
 
@@ -31,21 +32,41 @@ void print_binary(uint16_t byte)
         );
 }
 
+enum expandtype { upper, lower, number, none };
+/* expands shorthand notations like a-z in the string s1 into the equivalent
+ * complete list abc...xyz in s2. */
 void expand(char s1[], char s2[])
 {
-    int i = 0, j = 0;
-    for (; s2[i] != '\0'; i++) {
-        switch (s1[i]) {
-        case '-':
-            s2[j++] = s1[i];
-            putchar('*');
-            break;
-        default:
-            s2[j++] = s1[i];
-            break;
+    int i1 = 0, i2 = 0;
+    bool expanding = false;
+    enum expandtype current_exp = none;
+    char last, now, next;
+    for (i1 = 0; s1[i1] != '\0'; i1++) {
+        last = s1[i1];
+        now = s1[i1 + 1];
+        next = s1[i1 + 2];
+
+        if (('a' <= last) && (last <= 'z')
+            && (now == '-')
+            && ('a' <= next) && (next <= 'z')
+            ) {
+            current_exp = lower;
+            i1 += 2;
+            s2[i2++] = 'l';
+
+        } else if (('A' <= last) && (last <= 'Z')
+                   && (now == '-')
+                   && ('A' <= next) && (next <= 'Z')
+            ) {
+            current_exp = lower;
+            i1 += 2;
+            s2[i2++] = 'U';
+        } else {
+            current_exp = none;
+            s2[i2++] = s1[i1];
         }
     }
-    s2[j++] = '\0';
+    s2[i2++] = '\0';
 }
 
 void testit(char s1[])
@@ -56,18 +77,19 @@ void testit(char s1[])
 
     char s2[256];
     start = clock();
-    for (int k = 0; k <= TESTREPS; k++) {
+    for (int k = 1; k <= TESTREPS; k++) {
         expand(s1, s2);
     }
     /* diff = clock() - start; */
     /* msec = diff * 1000 / CLOCKS_PER_SEC; */
     /* printf("\n %4d msec", msec); */
-    printf("\n%s:%s", s1, s2);
+    printf(":%s:%s;\n", s1, s2);
 }
 
 int main()
 {
-    printf("\n%s:%s", "in", "out");
+    printf("%s:%s;\n", "in", "out");
+    testit("");
     testit("a");
     testit("b");
     testit("-a");               /* leading */
