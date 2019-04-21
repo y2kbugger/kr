@@ -37,15 +37,24 @@ void print_binary(uint16_t byte)
 void expand(char s1[], char s2[])
 {
     int i1 = 0, i2 = 0;
-    bool expanding = false;
     char last = '\0', current, next;
     for (i1 = 0; s1[i1] != '\0'; i1++) {
         current = s1[i1];
         next = s1[i1 + 1];
 
         if (s1[i1] == '-') {
-            s2[i2++] = '*';
+            /* Literal hyphens */
+            if (last == '\0' || next == '\0') {
+                s2[i2++] = '-';
+                continue;
+            }
+
+            /* replace the hyphen with the full range of chars */
+            while (last < next - 1) {
+                s2[i2++] = ++last;
+            }
         } else {
+            /* normal chars */
             s2[i2++] = s1[i1];
         }
 
@@ -80,6 +89,8 @@ int main()
     testit("-a");               /* leading */
     testit("a-");               /* trailing */
     testit("a-b");
+    testit("a-c");
+    testit("a-z");
     testit("1");
     testit("2");
     testit("0");
@@ -87,9 +98,19 @@ int main()
     testit("B");
     testit("AB");
     testit("A-B");
-    testit("A-B");
+    testit("A-K");
     testit("a-b-c");
     testit("a-z0-9");
     testit("-a-z");
+
     testit("a-Z");
+    testit("A-z");
+
+    testit("z-A");
+    testit("Z-a");
+
+    testit("a-z");
+    testit("A-Z");
+
+    testit("1-G");
 }
