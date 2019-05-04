@@ -49,8 +49,8 @@ void reverse(char s[])
 /* atof: convert string to float */
 double atof2(char s[])
 {
-    double val, power;
-    int i, sign;
+    double val, power, exponent;
+    int i, sign, expsign;
     for (i = 0; isspace(s[i]); i++)     /* skip white space */
         ;
     sign = (s[i] == '-') ? -1 : 1;
@@ -64,14 +64,30 @@ double atof2(char s[])
         val = 10.0 * val + (s[i] - '0');
         power *= 10.0;
     }
-    return sign * val / power;
+    if (s[i] == 'e' || s[i] == 'E')
+        i++;
+    expsign = (s[i] == '-') ? -1 : 1;
+    if (s[i] == '+' || s[i] == '-')
+        i++;
+    for (exponent = 0; isdigit(s[i]); i++) {
+        exponent = 10.0 * exponent + (s[i] - '0');
+    }
+    val = sign * val / power;
+    while (exponent-- > 0) {
+        if (expsign > 0)
+            val *= 10;
+        else
+            val /= 10;
+    }
+    return val;
 
 }
 
 void testit(char s[])
 {
     clock_t start, diff;
-    int msec, i;
+    int msec;
+    double i;
     start = clock();
 
     start = clock();
@@ -95,8 +111,15 @@ int main()
     testit("11.1");
     testit("1.");
     testit("1.9");
+    testit("1.1e-3");
+    testit("1.1e-2");
+    testit("1.1e-1");
+    testit("1.1e-0");
     testit("1.1e0");
     testit("1.1e1");
     testit("1.1e2");
+    testit("1.1e3");
     testit("1.1e33");
+
+    testit("1.1E2");
 }
