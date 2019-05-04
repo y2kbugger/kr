@@ -48,7 +48,11 @@ void reverse(char s[])
 int strrindex(char t, char s[])
 {
     int i = -1;
-
+    int j = -1;
+    char c;
+    while ((c=s[++j]))
+        if (c == t)
+            i = j;
     return i;
 }
 
@@ -73,7 +77,10 @@ int main()
     printf("%s;\t%s\n", "in:in", "out");
 
     testit('z', "hello world");
+    testit('z', "zello world");
     testit('z', "hello zorld");
     testit('z', "zello zorld");
     testit('z', "hezzo zorld");
+    testit('z', "hezzo zorlz");
+    testit('z', "");
 }
