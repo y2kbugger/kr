@@ -44,7 +44,6 @@ void reverse(char s[])
     }
 }
 
-/* itoa: convert n to characters in a s */
 int strrindex(char t, char s[])
 {
     int i = -1;
@@ -76,11 +75,9 @@ int main()
 {
     printf("%s;\t%s\n", "in:in", "out");
 
-    testit('z', "hello world");
-    testit('z', "zello world");
-    testit('z', "hello zorld");
-    testit('z', "zello zorld");
-    testit('z', "hezzo zorld");
-    testit('z', "hezzo zorlz");
-    testit('z', "");
+    testit("");
+    testit("1.0");
+    testit("1.1");
+    testit("71.1");
+    testit("1.1e3");
 }
