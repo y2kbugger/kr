@@ -127,10 +127,10 @@ int getop(char s[])
 
     while ((s[0] = c = getch()) == ' ' || c == '\t');
     s[1] = '\0';
-    if (!isdigit(c) && c != '.')
+    if (!isdigit(c) && c != '.' && c != '-')
         return c;               /* not a number */
     i = 0;
-    if (isdigit(c))             /* collect integer part */
+    if (isdigit(c) || c == '-') /* collect integer part */
         while (isdigit(s[++i] = c = getch()));
     if (c == '.')               /* collect fraction part */
         while (isdigit(s[++i] = c = getch()));
@@ -193,4 +193,5 @@ int main()
     testit("10.8 0.5 -");
     testit("100 10 /");
     testit("100 11 /");
+    testit("-5 4 +");
 }
