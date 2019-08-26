@@ -1,18 +1,16 @@
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
-#include <stdlib.h> /* for atof() */
+#include <stdlib.h>             /* for atof() */
 #include <stdint.h>
 #include <time.h>
 #include <stdbool.h>
 
 #include <ctype.h>
 
-#define TESTREPS 1
-
 /*
- * Exercise 4-2. Extend atof to handle scientific notation of tge form 123.45e-6 where a floating-point number may be followed by e or E and an optionally signed exponent.
- *
+ * Exercise 4-3. Given the basic framework, it's straightforward to extend the
+ * calculator. Add the modulus (%) operator and provisions for negative numbers.
  */
 
 const char *bit_rep[16] = {
@@ -46,87 +44,153 @@ void reverse(char s[])
     }
 }
 
-#define MAXOP 100 /* max size of operand or operator */
-#define NUMBER '0' /* signal that a number was found */
-int getop(char []);
+#define MAXOP 100               /* max size of operand or operator */
+#define NUMBER '0'              /* signal that a number was found */
+
+
+int getop(char[]);
 void push(double);
 double pop(void);
 
 /* reverse Polish calculator */
-main() {
+int calculator()
+{
     int type;
     double op2;
     char s[MAXOP];
+
     while ((type = getop(s)) != EOF) {
         switch (type) {
-            case NUMBER:
-                push(atof(s));
-                break;
-            case '+ '':
-                push(pop() + pop());
-                break;
-            case '*':
-                push(pop() * pop());
-                break;
-            case '-':
-                op2 = pop();
-                push(pop() - op2);
-                break;
-            case '/':
-                op2 = pop();
-                if (op2 != 0.0)
-                    push(pop() / op2);
-                else  printf("error: zero divisor\n");
-                break;
-            case '\n':
-                printf("\t%.8g\n", pop());
-                break;
-            default:
-                printf("error: unknown command %s\n", s);
-                break;
+        case NUMBER:
+            push(atof(s));
+            break;
+        case '+':
+            push(pop() + pop());
+            break;
+        case '*':
+            push(pop() * pop());
+            break;
+        case '-':
+            op2 = pop();
+            push(pop() - op2);
+            break;
+        case '/':
+            op2 = pop();
+            if (op2 != 0.0)
+                push(pop() / op2);
+            else
+                printf("error: zero divisor\n");
+            break;
+        case '\n':
+            printf("\t%.8g\n", pop());
+            break;
+        default:
+            printf("error: unknown command %s\n", s);
+            break;
         }
     }
     return 0;
 }
 
+#define MAXVAL 100              /* maximum depth of val stack */
+
+int sp = 0;                     /* next free stack position */
+double val[MAXVAL];             /* value stack */
+
+/* push: push f onto value stack */
+void push(double f)
+{
+    if (sp < MAXVAL)
+        val[sp++] = f;
+    else
+        printf("Error: stack full, can't push %g\n", f);
+}
+
+/* pop: pop and return top value from stack */
+double pop(void)
+{
+    if (sp > 0)
+        return val[--sp];
+    else {
+        printf("error: stack empty\n");
+        return 0.0;
+    }
+}
+
+int getch(void);
+void ungetch(int);
+
+/* getop: get next operator or numeric operand */
+int getop(char s[])
+{
+    int i, c;
+
+    while ((s[0] = c = getch()) == ' ' || c == '\t');
+    s[1] = '\0';
+    if (!isdigit(c) && c != '.')
+        return c;               /* not a number */
+    i = 0;
+    if (isdigit(c))             /* collect integer part */
+        while (isdigit(s[++i] = c = getch()));
+    if (c == '.')               /* collect fraction part */
+        while (isdigit(s[++i] = c = getch()));
+    s[i] = '\0';
+    if (c != EOF)
+        ungetch(c);
+    return NUMBER;
+}
+
+#define BUFSIZE 100
+char buf[BUFSIZE];              /* buffer for ungetch */
+int bufp = 0;                   /* next free position in buf */
+
+#define FAKEUSERINPUTSIZE 1000
+char fui[FAKEUSERINPUTSIZE];    /* buffer for ungetch */
+int fuip = 0;                   /* next free position in buf */
+
+int getch(void)
+{                               /* get a (possibly pushed back) character */
+    /* return (bufp > 0) ? buf[--bufp] : getchar(); *//* original method */
+    return (bufp > 0) ? buf[--bufp] : fui[fuip++];      /* read from buffer instead */
+}
+
+void ungetch(int c)
+{                               /* push character back on input */
+    if (bufp >= BUFSIZE)
+        printf("ungetch: too many characters\n");
+    else
+        buf[bufp++] = c;
+}
+
+
 
 void testit(char s[])
 {
-    clock_t start, diff;
-    int msec;
-    double i;
-    start = clock();
 
-    start = clock();
-    for (int k = 1; k <= TESTREPS; k++) {
-        i = atof2(s);
-    }
-    diff = clock() - start;
-    msec = diff * 1000 / CLOCKS_PER_SEC;
-    /* printf("\n %4d msec", msec); */
-    printf("%s;\t%f\n", s, i);
+    /* reset fake user input buffer */
+    fuip = 0;
+    strcpy(fui, s);
+
+    /* fake an EOF */
+    fui[strlen(s)] = '\n';
+    fui[strlen(s) + 1] = EOF;
+
+    printf("%s;\t", s);
+    calculator();
+
 }
 
 int main()
 {
-    printf("%s;\t%s\n", "in", "out");
+    printf("%s;\t\t%s\n", "in", "out");
 
-    testit("1");
-    testit("1.0");
-    testit("1.1");
-    testit("9.1");
-    testit("11.1");
-    testit("1.");
-    testit("1.9");
-    testit("1.1e-3");
-    testit("1.1e-2");
-    testit("1.1e-1");
-    testit("1.1e-0");
-    testit("1.1e0");
-    testit("1.1e1");
-    testit("1.1e2");
-    testit("1.1e3");
-    testit("1.1e33");
-
-    testit("1.1E2");
+    testit("1 1 +");
+    testit("2 2 *");
+    testit("2 2 2 * *");
+    testit("2 2 2 2 * * *");
+    testit("2 2 2 2 2 * * * *");
+    testit("8 5 -");
+    testit("10.8 0.5 -");
+    testit("100 10 /");
+    testit("100 11 /");
 }
