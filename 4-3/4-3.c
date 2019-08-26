@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include <ctype.h>
 
@@ -80,6 +81,10 @@ int calculator()
                 push(pop() / op2);
             else
                 printf("error: zero divisor\n");
+            break;
+        case '%':
+            op2 = pop();
+            push(fmod(pop(), op2));
             break;
         case '\n':
             printf("\t%.8g\n", pop());
@@ -194,4 +199,8 @@ int main()
     testit("100 10 /");
     testit("100 11 /");
     testit("-5 4 +");
+    testit("10 5 %");
+    testit("11 5 %");
+    testit("27 5 %");
+    testit("11.11 3.14159 %");
 }
