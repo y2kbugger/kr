@@ -52,11 +52,14 @@ void reverse(char s[])
 int getop(char[]);
 void push(double);
 double pop(void);
+int sp;                         /* next free stack position */
+double val[];                   /* value stack */
 
 /* reverse Polish calculator */
 int calculator()
 {
     int type;
+    double op1;
     double op2;
     char s[MAXOP];
 
@@ -64,6 +67,25 @@ int calculator()
         switch (type) {
         case NUMBER:
             push(atof(s));
+            break;
+        case '=':              /* peek at top of stack */
+            op1 = pop();
+            printf("\t%.8g\n", op1);
+            push(op1);
+            break;
+        case 'd':              /* duplicate top of stack */
+            op1 = pop();
+            push(op2);
+            push(op2);
+            break;
+        case 's':              /* swap top 2 stack */
+            op1 = pop();
+            op2 = pop();
+            push(op1);
+            push(op2);
+            break;
+        case 'c':              /* clear stack */
+            sp = 0;
             break;
         case '+':
             push(pop() + pop());
@@ -203,4 +225,10 @@ int main()
     testit("11 5 %");
     testit("27 5 %");
     testit("11.11 3.14159 %");
+    testit("9 = = =");
+    testit("9 d +");            /* test duplicate */
+    testit("100 10 /");         /* test swap */
+    testit("100 10 s /");       /* test swap */
+    testit("1 2 3 4 \n \n \n"); /* test clear stack */
+    testit("1 2 3 4 c \n \n \n");       /* test clear stack */
 }
