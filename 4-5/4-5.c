@@ -108,6 +108,16 @@ int calculator()
             op2 = pop();
             push(fmod(pop(), op2));
             break;
+        case 'e':              /* exp */
+            push(exp(pop()));
+            break;
+        case 'n':              /* sin */
+            push(sin(pop()));
+            break;
+        case 'p':              /* pow */
+            op2 = pop();
+            push(pow(pop(), op2));
+            break;
         case '\n':
             printf("\t%.8g\n", pop());
             break;
@@ -231,4 +241,13 @@ int main()
     testit("100 10 s /");       /* test swap */
     testit("1 2 3 4 \n \n \n"); /* test clear stack */
     testit("1 2 3 4 c \n \n \n");       /* test clear stack */
+    testit("1 e");              /* exp */
+    testit("1 n");              /* sin */
+    testit("3.14 n");           /* sin */
+    testit("0 n");              /* sin */
+    testit("0.5 n");            /* sin */
+    testit("2 0.5 p");          /* pow */
+    testit("2 1.0 p");          /* pow */
+    testit("2 2.0 p");          /* pow */
+    testit("2 8.0 p");          /* pow */
 }
