@@ -64,7 +64,7 @@ int calculator()
     double op2;
     char s[MAXOP];
 
-    while ((type = getop(s)) != EOF) {
+    while ((type = getop(s)) != EOF && type != '\0') {
         switch (type) {
         case NUMBER:
             push(atof(s));
@@ -210,8 +210,9 @@ void testit(char s[])
     strcpy(fui, s);
 
     /* fake an EOF */
-    fui[strlen(s)] = '\n';
-    fui[strlen(s) + 1] = EOF;
+    int fuilen = strlen(s);
+    fui[fuilen++] = '\n';
+    fui[fuilen++] = '\0';
 
     printf("%s;\t", s);
     calculator();
