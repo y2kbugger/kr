@@ -49,12 +49,12 @@ void reverse(char s[])
 #define MAXOP 100               /* max size of operand or operator */
 #define NUMBER '0'              /* signal that a number was found */
 
-
 int getop(char[]);
 void push(double);
 double pop(void);
 int sp;                         /* next free stack position */
 double val[];                   /* value stack */
+double var[256];                /* var array */
 
 /* reverse Polish calculator */
 int calculator()
@@ -69,9 +69,20 @@ int calculator()
         case NUMBER:
             push(atof(s));
             break;
+        case '>':              /* Variables store */
+            op1 = pop();
+            printf("\tStoring %.8g into %c\n", op1, s[0]);
+            var[(int) s[0]] = op1;
+            break;
+        case '@':              /* Variables use */
+            op1 = var[(int) s[0]];
+            printf("\tRestoring %.8g from %c\n", op1, s[0]);
+            push(op1);
+            break;
         case '=':              /* peek at top of stack */
             op1 = pop();
             printf("\t%.8g\n", op1);
+            var[(int) '@'] = op1;       /* store in recent var '@' */
             push(op1);
             break;
         case 'd':              /* duplicate top of stack */
@@ -120,7 +131,10 @@ int calculator()
             push(pow(pop(), op2));
             break;
         case '\n':
-            printf("\t%.8g\n", pop());
+            /* pop, print, and store in recent var '@' */
+            op1 = pop();
+            printf("\t%.8g\n", op1);
+            var[(int) '@'] = op1;       /* store in recent var '@' */
             break;
         default:
             printf("error: unknown command %s\n", s);
@@ -162,8 +176,13 @@ void ungetch(int);
 int getop(char s[])
 {
     int i, c;
-
     while ((s[0] = c = getch()) == ' ' || c == '\t');
+    if (c == '@' || c == '>') { /* variables */
+        s[0] = getch();
+        s[1] = '\0';
+        return c;
+    }
+
     s[1] = '\0';
     if (!isdigit(c) && c != '.' && c != '-')
         return c;               /* not a number */
@@ -252,4 +271,8 @@ int main()
     testit("2 1.0 p");          /* pow */
     testit("2 2.0 p");          /* pow */
     testit("2 8.0 p");          /* pow */
+    /* @ is the 'recent' or last printed variable, >is store, @is read */
+    testit("2 2 2 2 2 * >s * * @s @s +");
+    testit("1 2 3 4 \n \n \n @@ @@ *");
+    testit("2 \n @@ @@ * \n @@ @@ * \n @@ @@ * \n @@ @@ * \n @@ @@ * ");
 }
