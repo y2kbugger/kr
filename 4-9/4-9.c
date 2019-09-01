@@ -13,6 +13,8 @@
  * Exercise 4-9. Our getch and ungetch do not handle a pushed-back EOF
  * correctly. Decide what their properties ought to be if an EOF is pushed
  * back, then implement your design.
+ * It should hold the EOF signal like any other char. This allows the
+ * test input to use the same interace as the real getchar.
  */
 
 const char *bit_rep[16] = {
@@ -64,7 +66,7 @@ int calculator()
     double op2;
     char s[MAXOP];
 
-    while ((type = getop(s)) != EOF && type != '\0') {
+    while ((type = getop(s)) != EOF) {
         switch (type) {
         case NUMBER:
             push(atof(s));
@@ -192,13 +194,12 @@ int getop(char s[])
     if (c == '.')               /* collect fraction part */
         while (isdigit(s[++i] = c = getch()));
     s[i] = '\0';
-    if (c != EOF)
-        ungetch(c);
+    ungetch(c);
     return NUMBER;
 }
 
 #define BUFSIZE 200
-char buf[BUFSIZE];              /* buffer for ungetch */
+int buf[BUFSIZE];               /* buffer for ungetch */
 int bufp = 0;                   /* next free position in buf */
 
 int getch(void)
@@ -225,7 +226,7 @@ void ungets(char s[])
 void fake_buffer(char s[])
 {
     /* push back the fake input */
-    ungetch('\0');
+    ungetch(EOF);
     ungetch('\n');
     ungets(s);
 
