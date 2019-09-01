@@ -197,34 +197,14 @@ int getop(char s[])
     return NUMBER;
 }
 
-#define BUFSIZE 100
+#define BUFSIZE 200
 char buf[BUFSIZE];              /* buffer for ungetch */
 int bufp = 0;                   /* next free position in buf */
 
-#define FAKEUSERINPUTSIZE 1000
-char fui[FAKEUSERINPUTSIZE];    /* buffer for ungetch */
-int fuip = 0;                   /* next free position in buf */
-
-int getch_human(void)
+int getch(void)
 {                               /* get a (possibly pushed back) character */
     return (bufp > 0) ? buf[--bufp] : getchar();
 }
-
-int getch_faked(void)
-{                               /* get a (possibly pushed back) character from faked input */
-    if (bufp > 0) {
-        return buf[--bufp];
-    } else if (fui[fuip] == '\0') {
-        return '\0';
-    } else
-        return fui[fuip++];
-}
-
-int getch(void)
-{
-    return getch_faked();
-}
-
 
 void ungetch(int c)
 {                               /* push character back on input */
@@ -236,67 +216,26 @@ void ungetch(int c)
 
 void ungets(char s[])
 {                               /* push string back on input */
-    for (int i = strlen(s); i >= 0; i--) {
+    for (int i = strlen(s) - 1; i >= 0; i--) {
         ungetch(s[i]);
         printf("%c", i);
     }
 }
 
-
 void fake_buffer(char s[])
 {
-    /* reset fake user input buffer */
-    fuip = 0;
-    bufp = 0;
-    strcpy(fui, s);
+    /* push back the fake input */
+    ungetch('\0');
+    ungetch('\n');
+    ungets(s);
 
-    /* fake an EOF */
-    int fuilen = strlen(s);
-    fui[fuilen++] = '\n';
-    fui[fuilen++] = '\0';
-
-    printf("%s;\t", s);
+    printf("%s;", s);
 }
-
 
 void testit(char s[])
 {
     fake_buffer(s);
     calculator();
-}
-
-void test_ungets(char s[])
-{
-    fake_buffer(s);
-    putchar(getch());
-    putchar(getch());
-    putchar(getch());
-    ungetch('2');
-    putchar(getch());
-    putchar(getch());
-    putchar(getch());
-
-    ungetch('1');
-    ungetch('k');
-    ungetch('c');
-    ungetch('a');
-    ungetch('b');
-    ungetch('1');
-
-    putchar(getch());
-    putchar(getch());
-    putchar(getch());
-    putchar(getch());
-    putchar(getch());
-    putchar(getch());
-
-    ungets("2back2");
-    putchar(getch());
-    putchar(getch());
-    putchar(getch());
-    putchar(getch());
-    putchar(getch());
-    putchar(getch());
 }
 
 int main()
@@ -336,7 +275,8 @@ int main()
     testit("2 2 2 2 2 * >s * * @s @s +");
     testit("1 2 3 4 \n \n \n @@ @@ *");
     testit("2 \n @@ @@ * \n @@ @@ * \n @@ @@ * \n @@ @@ * \n @@ @@ * ");
-
-
-    test_ungets("alpha");
+    testit("1 1 +");
+    testit("1 1 +");
+    testit("1 1 +");
+    /* calculator(); */
 }
