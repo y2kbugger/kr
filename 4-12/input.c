@@ -48,40 +48,28 @@ void reverse(char s[])
 }
 
 /* itoa: convert n to characters in a s */
-void itoa(int n, char s[])
+int itoa(long n, char s[], int i)
 {
-    int i, sign;
-    long ln;
-    ln = n;
-
-    if ((sign = ln) < 0)        /* record sign */
-        ln = -ln;
-    i = 0;
-
-    do {                        /* generate digits in reverse order */
-        s[i++] = ln % 10 + '0'; /* get next digit */
-    } while ((ln /= 10) > 0);   /* delete it */
-    if (sign < 0)
+    printf("entering itoa, %ld, %s, %d\n", n, s, i);
+    if (n < 0) {
+        n = -n;
         s[i++] = '-';
-    s[i++] = '\0';
-    reverse(s);
+    }
+
+    char c = n % 10 + '0';      /* get next digit */
+    if ((n /= 10) > 0)          /* delete it */
+        i = itoa(n, s, i);
+    s[i++] = c;
+    s[i + 1] = '\0';
+    return i;
 }
 
-void testit(int n)
-{
-    clock_t start, diff;
-    int msec;
-    start = clock();
 
-    char s[4448];
-    start = clock();
-    for (int k = 1; k <= TESTREPS; k++) {
-        itoa(n, s);
-    }
-    diff = clock() - start;
-    msec = diff * 1000 / CLOCKS_PER_SEC;
-    /* printf("\n %4d msec", msec); */
-    printf(":%d:%s;\n", n, s);
+void testit(long n)
+{
+    char s[100];
+    itoa(n, s, 0);
+    printf(":%ld:%s;\n", n, s);
 }
 
 int main()
@@ -90,9 +78,9 @@ int main()
     int minint = -(1 << (wordsize - 1));
     printf("%s:%s;\n", "in", "out");
 
-    testit(1);
-    testit(1455);
-    testit(-1455);
+    testit(1L);
+    testit(1455L);
+    testit(-1455L);
 
     testit(minint);
 }
