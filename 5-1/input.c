@@ -55,11 +55,15 @@ int getint(int *pn)
 
     if (!isdigit(c) && c != EOF && c != '+' && c != '-') {
         ungetch(c);             /* it's not a number */
-        return 0;
+        return 1;
     }
     sign = (c == '-') ? -1 : 1;
     if (c == '+' || c == '-')
         c = getch();
+    if (!isdigit(c)) {
+        ungetch(c);
+        return 1;
+    }
     for (*pn = 0; isdigit(c); c = getch())
         *pn = 10 * *pn + (c - '0');
     *pn *= sign;
