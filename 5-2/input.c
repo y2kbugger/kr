@@ -37,12 +37,10 @@ void ungets(char s[])
 
 void fake_buffer(char s[])
 {
-
     /* push back the fake input */
     ungetch(EOF);
-    ungetch('\n');
+    /* ungetch('\n'); */
     ungets(s);
-
 }
 
 int getfloat(float *pn)
@@ -53,22 +51,38 @@ int getfloat(float *pn)
     while (isspace(c = getch()))        /* skip white space */
         ;
 
-    if (!isdigit(c) && c != EOF && c != '+' && c != '-') {
+    if (EOF == c)
+        return EOF;
+
+    if (!isdigit(c) && c != '+' && c != '-' && c != '.') {
         ungetch(c);             /* it's not a number */
         return 1;
     }
+
     sign = (c == '-') ? -1 : 1;
-    if (c == '+' || c == '-')
+    if (c == '+' || c == '-') {
         c = getch();
-    if (!isdigit(c)) {
-        ungetch(c);
-        return 1;
+        if (!isdigit(c)) {
+            ungetch(c);
+            ungetch((sign == -1) ? '-' : '+');
+            return 2;
+        }
     }
-    for (*pn = 0.0; isdigit(c); c = getch())
+
+    for (*pn = 0.0; (isdigit(c) && c != '.'); c = getch())
         *pn = 10 * *pn + (c - '0');
+    if (c == '.') {
+        float scale = 1;
+        c = getch();
+        for (; (isdigit(c)); c = getch()) {
+            *pn = 10 * *pn + (c - '0');
+            scale /= 10;
+        }
+        *pn *= scale;
+    }
     *pn *= sign;
-    if (c != EOF)
-        ungetch(c);
+
+    ungetch(c);
     return 0;
 }
 
@@ -76,19 +90,33 @@ void testit(char s[])
 {
     printf("%s;", s);
     fake_buffer(s);
-    int i;
-    if (!getfloat(&i))
-        printf("float found:%f", i);
-    else
-        printf("no float found.");
+    float i;
+    int retval = 0;
+    while (1) {
+        retval = getfloat(&i);
+        if (retval == 0)
+            printf("float:\"%f\"", i);
+        else if (retval == 1)
+            putchar(getch());
+        else if (retval == 2)
+            putchar(getch());
+        if (retval == EOF)
+            break;
+    }
     printf("\n");
 }
 
 
 int main()
 {
-    testit("");
+    testit("1 2 3");
     testit("2");
+    /* testit(""); */
+    /* testit(" "); */
+    /* testit("jkjj"); */
+    testit("2");
+    testit("1 2 3");
+    testit("1,2,3");
     testit("22");
     testit("+22");
     testit("-22");
@@ -97,5 +125,11 @@ int main()
     testit("-3.14159");
     testit(" -3.14159");
     testit("\t9993.14159");
+    testit("3.");
+    testit("3. ");
+    testit("3.j");
+    testit("3.j ");
+    testit(".2");
+    testit(" .2");
 
 }
