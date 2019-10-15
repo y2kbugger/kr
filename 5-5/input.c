@@ -21,17 +21,37 @@ void *_strncpy(char *s, char *ct, int n)
  * terminate s with ′\0′*/
 void *_strncat(char *s, char *ct, int n)
 {
-    while (*s++)
-        putchar(*s);
+    /* find the end of s */
+    while (*s++);
 
     _strncpy(--s, ct, n);
+
+    /* make sure it gets terminated correctly */
     *(s + n) = '\0';
 }
 
 /* compare at most n characters of string cs to string ct;
  * return <0 if cs<ct, 0 if cs==ct, or >0 if cs>ct. */
-int _strncmp(char *s, char *ct, int n)
+int _strncmp(char *cs, char *ct, int n)
 {
+
+    /* cs is empty */
+    if (*cs == '\0')
+        return 0;
+
+    for (int i = 0; i < n - 1; i++) {
+        cs++, ct++;
+
+        if (*cs > *ct)
+            return 1;
+        else if (*cs < *ct)
+            return -1;
+
+        /* both have finished */
+        if (*cs == '\0')
+            return 0;
+    }
+
     return 0;
 }
 
@@ -57,8 +77,8 @@ void testit(char *s, char *t, int n)
     /* strncmp */
     strcpy(si, s);
     strcpy(ti, t);
-    _strncmp(si, ti, n);
-    printf("\tcmp:\t%s;%s\n", si, ti);
+    int cmp_result = _strncmp(si, ti, n);
+    printf("\tcmp:\t%d\n", cmp_result);
 }
 
 
