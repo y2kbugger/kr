@@ -21,6 +21,11 @@ void *_strncpy(char *s, char *ct, int n)
  * terminate s with ′\0′*/
 void *_strncat(char *s, char *ct, int n)
 {
+    while (*s++)
+        putchar(*s);
+
+    _strncpy(--s, ct, n);
+    *(s + n) = '\0';
 }
 
 /* compare at most n characters of string cs to string ct;
