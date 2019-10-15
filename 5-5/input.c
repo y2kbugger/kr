@@ -8,18 +8,19 @@
  * Full descriptions are in Appendix B.
  */
 
-/* copy at most n characters of string ct to s; return s.
+/* copy at most n characters of string ct to s;
  * Pad with ′\0′s if it has fewer than n characters. */
-char *_strncpy(char *s, char *ct, int n)
+void *_strncpy(char *s, char *ct, int n)
 {
-    return s;
+
+    for (int i = 0; i < n; i++)
+        *s++ = (*ct == '\0') ? '\0' : *ct++;
 }
 
 /* concatenate at most n characters of string ct to string s,
- * terminate s with ′\0′; return s. */
-char *_strncat(char *s, char *ct, int n)
+ * terminate s with ′\0′*/
+void *_strncat(char *s, char *ct, int n)
 {
-    return s;
 }
 
 /* compare at most n characters of string cs to string ct;
@@ -32,8 +33,8 @@ int _strncmp(char *s, char *ct, int n)
 void testit(char *s, char *t, int n)
 {
     printf("%s;%s;%d:\n", s, t, n);
-    char si[50];
-    char ti[50];
+    char si[200];
+    char ti[200];
 
     /* strncpy */
     /* Make a backup to prevent functions from affection one another */
