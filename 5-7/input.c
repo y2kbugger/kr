@@ -2,95 +2,125 @@
 #include <string.h>
 #include <ctype.h>
 /*
- * Exercise 5-5. Rewrite readlines to store lines in an array supplied by main,
+ * Exercise 5-7. Rewrite readlines to store lines in an array supplied by main,
  * rather than calling alloc to maintain storage. How much faster is the
- * program?
+ * program
  */
 
-/* max #lines to be sorted */
-#define MAXLINES 5000
+#define MAXLINES 5000           /* max #lines to be sorted  */
 
-char  *lineptr[MAXLINES];
+#define ALLOCSIZE 100000        /* size of available space  */
+static char allocbuf[ALLOCSIZE];        /* storage for alloc */
+static char *allocp = allocbuf; /* next free position */
 
-/* pointers to text lines  */
-int  readlines(char  *lineptr[],  int  nlines);
-void  writelines(char  *lineptr[],  int  nlines);
-void  qsort(char  *lineptr[],  int  left,  int  right);   /* sort input lines  */
+char *alloc(int n)
+{                               /* return pointer to n characters */
+    if (allocbuf + ALLOCSIZE - allocp >= n) {   /* it fits */
+        allocp += n;
+        return allocp - n;      /* old p */
+    } else                      /* not enough room */
+        return 0;
+}
 
-voic main()
+void afree(char *p)
+{                               /* free storage pointed to by p */
+    if (p >= allocbuf && p < allocbuf + ALLOCSIZE)
+        allocp = p;
+}
+
+/* getline:  read a line into s, return length */
+int _getline(char s[], int lim)
 {
-    /* number of input lines read  */
-    int  nlines;
-        if ((nlines =  readlines(lineptr,  MAXLINES)) >=  0)
-          {
-                qsort(lineptr,  0,  nlines - 1);
-                writelines(lineptr,  nlines);
-                return  0;
-        } else {
-        printf("error: input too big to sort\n");
-        return  1;
+    int c, i;
+    for (i = 0; i < lim - 1 && (c = getchar()) != EOF && c != '\n'; ++i)
+        s[i] = c;
+    if (c == '\n') {
+        s[i] = c;
+        ++i;
+    }
+    s[i] = '\0';
+    return i;
+}
+
+/* writelines:  write output lines  */
+void writelines(char *lineptr[], int nlines)
+{
+    int i;
+    for (i = 0; i < nlines; i++)
+        printf("&%s\n", lineptr[i]);
+}
+
+
+/* ========================= */
+
+char *lineptr[MAXLINES];        /* pointers to text lines  */
+
+int readlines(char *lineptr[], int nlines);
+void writelines(char *lineptr[], int nlines);
+void _qsort(char *lineptr[], int left, int right);
+
+/* sort input lines  */
+int main()
+{
+    /* number of input lines read  */
+    int nlines;
+    if ((nlines = readlines(lineptr, MAXLINES)) >= 0) {
+        _qsort(lineptr, 0, nlines - 1);
+        writelines(lineptr, nlines);
+        return 0;
+    } else {
+        printf("error: input too big to sort\n");
+        return 1;
     }
 }
 
-#define MAXLEN 1000
-/* max length of any input line */
-int  getline(char  *,   int);
-char  *alloc(int);
-/* readlines:  read input lines */
-int  readlines(char  *lineptr[],  int  maxlines)
-{
-    int  len,  nlines;
-        char  *p,  line[MAXLEN];
-        nlines ? ? =  0;
-        while  ((len ? ? =  getline(line,  MAXLEN)) ? ? > 0)
-                if  (nlines ? ? >= maxlines ?
-                              ? ¦¦ (p ? ? =  alloc(len)) ? ? ==  NULL)
-                        return  −1;
-        else
-              {
-                        line[len ? ? ? 1] ? ? =  ′\0 ? ? ?;
-              /* delete newline  */             strcpy(p,
-                                                                        line);
-                        lineptr[nlines++] ? ? =  p;
-                    }
-        return  nlines;
-}                               /* writelines:  write output lines  */
+#define MAXLEN 1000
+/* max length of any input line */
+int _getline(char s[], int);
+char *alloc(int);
 
-void  writelines(char  *lineptr[],  int  nlines)
+/* readlines:  read input lines */
+int readlines(char *lineptr[], int maxlines)
 {
-        int  i;
-        for  (i ? ? =  0;  i ? ? < nlines;  i++)
-                printf("%s\n",  lineptr[i]);
+    int len, nlines;
+    char *p, line[MAXLEN];
+
+    nlines = 0;
+    while ((len = _getline(line, MAXLEN)) > 0)
+        if (nlines >= maxlines || (p = alloc(len)) == NULL)
+            return -1;
+        else {
+            line[len - 1] = '\0';       /* delete newline  */
+            strcpy(p, line);
+            lineptr[nlines++] = p;
+        }
+    return nlines;
 }
 
-void testit(char *s, char *t, int n)
+/* qsort:  sort v[left]...v[right] into increasing order */
+void _qsort(char *v[], int left, int right)
 {
-    printf("%s;%s;%d:\n", s, t, n);
-    char si[200];
-    char ti[200];
+    int i, last;
+    void swap(char *v[], int i, int j);
 
-    /* strncpy */
-    /* Make a backup to prevent functions from affection one another */
-    strcpy(si, s);
-    strcpy(ti, t);
-    _strncpy(si, ti, n);
-    printf("\tcpy:\t%s;%s\n", si, ti);
-
-    /* strncat */
-    strcpy(si, s);
-    strcpy(ti, t);
-    _strncat(si, ti, n);
-    printf("\tcat:\t%s;%s\n", si, ti);
-
-    /* strncmp */
-    strcpy(si, s);
-    strcpy(ti, t);
-    int cmp_result = _strncmp(si, ti, n);
-    printf("\tcmp:\t%d\n", cmp_result);
+    if (left >= right)          /* do nothing if array contains */
+        return;                 /* fewer than two elements */
+    swap(v, left, (left + right) / 2);
+    last = left;
+    for (i = left + 1; i <= right; i++)
+        if (strcmp(v[i], v[left]) < 0)
+            swap(v, ++last, i);
+    swap(v, left, last);
+    _qsort(v, left, last - 1);
+    _qsort(v, last + 1, right);
 }
 
-
-int main()
+/* swap:  interchange v[i] and v[j] */
+void swap(char *v[], int i, int j)
 {
-    testit("", "", 0);
+    char *temp;
+
+    temp = v[i];
+    v[i] = v[j];
+    v[j] = temp;
 }
