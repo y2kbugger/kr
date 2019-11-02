@@ -2,4 +2,4 @@ program:
 	gcc -Wall *.c -o out
 	 
 	# Result:
-	./out
+	head -n1000 < ./words_alpha.txt | ./out
