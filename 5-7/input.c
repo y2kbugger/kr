@@ -6,35 +6,21 @@
  * rather than calling alloc to maintain storage. How much faster is the
  * program
 
-$ time <words_alpha.shuffled.txt ./out >fil3
+$ time (for i in {1..10}; do <words_alpha.shuffled.txt ./out > /dev/null ; done) 
+
 Original
-real    0m0.520s
+real    0m4.602s
+user    0m4.514s
+sys     0m0.097s
+
 
 After
+real    0m5.019s
+user    0m4.962s
+sys     0m0.066s
+
  */
 
-#define MAXLINES 500000         /* max #lines to be sorted  */
-
-#define ALLOCSIZE 10000000      /* size of available space  */
-static char allocbuf[ALLOCSIZE];        /* storage for alloc */
-static char *allocp = allocbuf; /* next free position */
-
-char *alloc(int n)
-{                               /* return pointer to n characters */
-    if (allocbuf + ALLOCSIZE - allocp >= n) {   /* it fits */
-        allocp += n;
-        return allocp - n;      /* old p */
-    } else                      /* not enough room */
-        return 0;
-}
-
-void afree(char *p)
-{                               /* free storage pointed to by p */
-    if (p >= allocbuf && p < allocbuf + ALLOCSIZE)
-        allocp = p;
-}
-
-/* getline:  read a line into s, return length */
 int _getline(char s[], int lim)
 {
     int c, i;
@@ -60,6 +46,8 @@ void writelines(char *lineptr[], int nlines)
 /* ========================= */
 
 #define MAXLEN 100
+#define MAXLINES 500000         /* max #lines to be sorted  */
+#define AVERAGELEN 10
 char *lineptr[MAXLINES];        /* pointers to text lines  */
 
 int readlines(char *lineptr[], int nlines, char *linestore);
@@ -70,7 +58,7 @@ void _qsort(char *lineptr[], int left, int right);
 int main()
 {
     int nlines;                 /* number of input lines read  */
-    char *linestore = malloc(MAXLINES * MAXLEN);        /* storage for lines */
+    char *linestore = malloc(MAXLINES * AVERAGELEN);    /* storage for lines */
 
     if ((nlines = readlines(lineptr, MAXLINES, linestore)) >= 0) {
         _qsort(lineptr, 0, nlines - 1);
