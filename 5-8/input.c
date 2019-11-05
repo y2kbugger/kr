@@ -2,117 +2,77 @@
 #include <string.h>
 #include <ctype.h>
 /*
- * Exercise 5-7. Rewrite readlines to store lines in an array supplied by main,
- * rather than calling alloc to maintain storage. How much faster is the
- * program
-
-$ time (for i in {1..10}; do <words_alpha.shuffled.txt ./out > /dev/null ; done) 
-
-Original
-real    0m4.602s
-user    0m4.514s
-sys     0m0.097s
-
-
-After
-real    0m5.019s
-user    0m4.962s
-sys     0m0.066s
-
+ * Exercise 5-8. There is no error checking in day_of_year or month_day. Remedy this defect.
  */
 
-int _getline(char s[], int lim)
+static char daytab[2][13] = {
+    { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
+    { 0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }
+};
+
+/* day_of_year:  return day of year from month & day */
+int day_of_year(int year, int month, int day)
 {
-    int c, i;
-    for (i = 0; i < lim - 1 && (c = getchar()) != EOF && c != '\n'; ++i)
-        s[i] = c;
-    if (c == '\n') {
-        s[i] = c;
-        ++i;
+    int i, leap;
+
+    if (month < 1 || 12 < month)
+        return 0;
+
+    leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+
+    if (day < 1 || daytab[leap][month] < day)
+        return 0;
+
+    for (i = 1; i < month; i++)
+        day += daytab[leap][i];
+    return day;
+}
+
+/* month_day:  set month, day from day of year */
+void month_day(int year, int yearday, int *pmonth, int *pday)
+{
+    int i, leap;
+
+    leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+
+    if (yearday < 1 || 365 + leap < yearday) {
+        *pmonth = 0;
+        *pday = 0;
+        return;
     }
-    s[i] = '\0';
-    return i;
+    for (i = 1; yearday > daytab[leap][i]; i++)
+        yearday -= daytab[leap][i];
+    *pmonth = i;
+    *pday = yearday;
 }
 
-/* writelines:  write output lines  */
-void writelines(char *lineptr[], int nlines)
+void test_doy(int year, int month, int day, int expected)
 {
-    int i;
-    for (i = 0; i < nlines; i++)
-        printf("&%s\n", lineptr[i]);
+    int doy = day_of_year(year, month, day);
+    printf("%d:%d\n", doy, expected);
+}
+
+void test_md(int year, int yearday, int expected_month, int expected_day)
+{
+    int pmonth = 0;
+    int pday = 0;
+    month_day(year, yearday, &pmonth, &pday);
+    printf("%d:%d, %d:%d\n", pmonth, expected_month, pday, expected_day);
 }
 
 
-/* ========================= */
-
-#define MAXLEN 100
-#define MAXLINES 500000         /* max #lines to be sorted  */
-#define AVERAGELEN 10
-char *lineptr[MAXLINES];        /* pointers to text lines  */
-
-int readlines(char *lineptr[], int nlines, char *linestore);
-void writelines(char *lineptr[], int nlines);
-void _qsort(char *lineptr[], int left, int right);
-
-/* sort input lines  */
 int main()
 {
-    int nlines;                 /* number of input lines read  */
-    char *linestore = malloc(MAXLINES * AVERAGELEN);    /* storage for lines */
-
-    if ((nlines = readlines(lineptr, MAXLINES, linestore)) >= 0) {
-        _qsort(lineptr, 0, nlines - 1);
-        writelines(lineptr, nlines);
-        return 0;
-    } else {
-        printf("error: input too big to sort\n");
-        return 1;
-    }
-}
-
-/* max length of any input line */
-int _getline(char s[], int);
-char *alloc(int);
-
-/* readlines:  read input lines */
-int readlines(char *lineptr[], int maxlines, char *linestore)
-{
-    int len, nlines;
-
-    nlines = 0;
-    while ((len = _getline(linestore, MAXLEN)) > 0)
-        if (nlines >= maxlines)
-            return -1;
-        else {
-            linestore[len - 1] = '\0';  /* delete newline  */
-            linestore += len;   /* move to next availble slot */
-            lineptr[nlines++] = linestore;;
-        }
-    return nlines;
-}
-
-/* qsort:  sort v[left]...v[right] into increasing order */
-void _qsort(char *v[], int left, int right)
-{
-    int i, last;
-    void swap(char *v[], int i, int j);
-    if (left >= right)          /* do nothing if array contains */
-        return;                 /* fewer than two elements */
-    swap(v, left, (left + right) / 2);
-    last = left;
-    for (i = left + 1; i <= right; i++)
-        if (strcmp(v[i], v[left]) < 0)
-            swap(v, ++last, i);
-    swap(v, left, last);
-    _qsort(v, left, last - 1);
-    _qsort(v, last + 1, right);
-}
-
-/* swap:  interchange v[i] and v[j] */
-void swap(char *v[], int i, int j)
-{
-    char *temp;
-    temp = v[i];
-    v[i] = v[j];
-    v[j] = temp;
+    test_doy(2019, 1, 1, 1);
+    test_doy(2019, -1, 1, 0);
+    test_doy(2019, 1, -1, 0);
+    test_doy(2019, 1, 2, 2);
+    test_doy(2019, 2, 1, 32);
+    test_doy(2019, 62, 1, 0);
+    test_doy(2019, 2, 28, 59);
+    test_doy(2019, 2, 29, 0);
+    test_md(2019, 32, 2, 1);
+    test_md(2019, 366, 0, 0);
+    test_md(2019, 0, 0, 0);
+    test_md(2019, -1, 0, 0);
 }

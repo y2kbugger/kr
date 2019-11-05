@@ -1,5 +1,3 @@
-program:
-	gcc -g -Wall *.c -o out
-	 
-	# Result:
-	< ./words_alpha.shuffled.txt head -n100 | ./out
+out: *.c
+	gcc -Wall *.c -o out
+	./out
