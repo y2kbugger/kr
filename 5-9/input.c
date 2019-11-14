@@ -13,7 +13,7 @@ static char daytab[2][13] = {
 /* day_of_year:  return day of year from month & day */
 int day_of_year(int year, int month, int day)
 {
-    int i, leap;
+    int leap;
 
     if (month < 1 || 12 < month)
         return 0;
@@ -23,8 +23,9 @@ int day_of_year(int year, int month, int day)
     if (day < 1 || daytab[leap][month] < day)
         return 0;
 
-    for (i = 1; i < month; i++)
-        day += daytab[leap][i];
+    for (char *monthp = daytab[leap]; month > 0; month--) {
+        day += *monthp++;
+    }
     return day;
 }
 
@@ -49,7 +50,7 @@ void month_day(int year, int yearday, int *pmonth, int *pday)
 void test_doy(int year, int month, int day, int expected)
 {
     int doy = day_of_year(year, month, day);
-    printf("%d:%d\n", doy, expected);
+    printf(";%d:%d\n", doy, expected);
 }
 
 void test_md(int year, int yearday, int expected_month, int expected_day)
@@ -71,6 +72,7 @@ int main()
     test_doy(2019, 62, 1, 0);
     test_doy(2019, 2, 28, 59);
     test_doy(2019, 2, 29, 0);
+    test_doy(2019, 12, 31, 365);
     test_md(2019, 32, 2, 1);
     test_md(2019, 366, 0, 0);
     test_md(2019, 0, 0, 0);
