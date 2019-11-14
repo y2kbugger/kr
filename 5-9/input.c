@@ -32,7 +32,7 @@ int day_of_year(int year, int month, int day)
 /* month_day:  set month, day from day of year */
 void month_day(int year, int yearday, int *pmonth, int *pday)
 {
-    int i, leap;
+    int leap;
 
     leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
 
@@ -41,9 +41,10 @@ void month_day(int year, int yearday, int *pmonth, int *pday)
         *pday = 0;
         return;
     }
-    for (i = 1; yearday > daytab[leap][i]; i++)
-        yearday -= daytab[leap][i];
-    *pmonth = i;
+    char *monthp = daytab[leap];
+    while (yearday > *monthp)
+        yearday -= *monthp++;
+    *pmonth = (int) (monthp - daytab[leap]);
     *pday = yearday;
 }
 
@@ -77,4 +78,7 @@ int main()
     test_md(2019, 366, 0, 0);
     test_md(2019, 0, 0, 0);
     test_md(2019, -1, 0, 0);
+    test_md(2018, 365, 12, 31);
+    test_md(2017, 365, 12, 31);
+    test_md(2016, 365, 12, 30);
 }
