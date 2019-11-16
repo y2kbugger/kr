@@ -10,11 +10,9 @@
 #include <ctype.h>
 
 /*
- * Exercise 4-9. Our getch and ungetch do not handle a pushed-back EOF
- * correctly. Decide what their properties ought to be if an EOF is pushed
- * back, then implement your design.
- * It should hold the EOF signal like any other char. This allows the
- * test input to use the same interace as the real getchar.
+ * Exercise 5-10. Write the program expr, which evaluates a reverse Polish expression from the command line, where each operator or operand is a separate argument. For example,
+ *
+ *      expr 2 3 4 + *
  */
 
 const char *bit_rep[16] = {
@@ -51,22 +49,89 @@ void reverse(char s[])
 #define MAXOP 100               /* max size of operand or operator */
 #define NUMBER '0'              /* signal that a number was found */
 
-int getop(char[]);
+int getop(int argc, char *arg, char s[]);
 void push(double);
 double pop(void);
 int sp;                         /* next free stack position */
 double val[];                   /* value stack */
 double var[256];                /* var array */
 
-/* reverse Polish calculator */
-int calculator()
+#define MAXVAL 100              /* maximum depth of val stack */
+
+int sp = 0;                     /* next free stack position */
+double val[MAXVAL];             /* value stack */
+
+/* push: push f onto value stack */
+void push(double f)
+{
+    if (sp < MAXVAL)
+        val[sp++] = f;
+    else
+        printf("Error: stack full, can't push %g\n", f);
+}
+
+/* pop: pop and return top value from stack */
+double pop(void)
+{
+    if (sp > 0)
+        return val[--sp];
+    else {
+        printf("error: stack empty\n");
+        return 0.0;
+    }
+}
+
+
+/* getop: get next operator or numeric operand */
+int getop(int argc, char *arg, char s[])
+{
+    int i = 0;
+    char c;
+
+    if (arg == NULL) {
+        return s[0] = s[1] = '\0';
+    }
+
+    c = *arg;
+
+    /* variables */
+    if (c == '@' || c == '>') {
+        s[0] = s[1] = '\0';
+        if (*(arg + 1) != '\0')
+            printf("Ignoring remaining part of variable: %s\n", arg + 1);
+        return c;
+    }
+
+    s[1] = '\0';
+    if (!isdigit(c) && c != '.' && c != '-') {
+        if (*(arg + 1) != '\0')
+            printf("Ignoring remaining part of operator: %s\n", arg + 1);
+        return c;               /* not a number */
+        i = 0;
+    }
+    if (isdigit(c) || c == '-') /* collect integer part */
+        while (isdigit(s[i++] = c = *(arg++)));
+    if (c == '.')               /* collect fraction part */
+        while (isdigit(s[i++] = c = *(arg++)));
+    s[i] = '\0';
+    if (*(--arg) != '\0')
+        printf("Ignoring remaining part of number: %s\n", arg);
+    printf("I think i found a number: %s\n", s);
+    return NUMBER;
+}
+
+#define BUFSIZE 200
+int buf[BUFSIZE];               /* buffer for ungetch */
+int bufp = 0;                   /* next free position in buf */
+
+int main(int argc, char **argv)
 {
     int type;
     double op1;
     double op2;
     char s[MAXOP];
 
-    while ((type = getop(s)) != EOF) {
+    while ((type = getop(--argc, *++argv, s)) != '\0') {
         switch (type) {
         case NUMBER:
             push(atof(s));
@@ -144,140 +209,4 @@ int calculator()
         }
     }
     return 0;
-}
-
-#define MAXVAL 100              /* maximum depth of val stack */
-
-int sp = 0;                     /* next free stack position */
-double val[MAXVAL];             /* value stack */
-
-/* push: push f onto value stack */
-void push(double f)
-{
-    if (sp < MAXVAL)
-        val[sp++] = f;
-    else
-        printf("Error: stack full, can't push %g\n", f);
-}
-
-/* pop: pop and return top value from stack */
-double pop(void)
-{
-    if (sp > 0)
-        return val[--sp];
-    else {
-        printf("error: stack empty\n");
-        return 0.0;
-    }
-}
-
-int getch(void);
-void ungetch(int);
-
-/* getop: get next operator or numeric operand */
-int getop(char s[])
-{
-    int i, c;
-    while ((s[0] = c = getch()) == ' ' || c == '\t');
-    if (c == '@' || c == '>') { /* variables */
-        s[0] = getch();
-        s[1] = '\0';
-        return c;
-    }
-
-    s[1] = '\0';
-    if (!isdigit(c) && c != '.' && c != '-')
-        return c;               /* not a number */
-    i = 0;
-    if (isdigit(c) || c == '-') /* collect integer part */
-        while (isdigit(s[++i] = c = getch()));
-    if (c == '.')               /* collect fraction part */
-        while (isdigit(s[++i] = c = getch()));
-    s[i] = '\0';
-    ungetch(c);
-    return NUMBER;
-}
-
-#define BUFSIZE 200
-int buf[BUFSIZE];               /* buffer for ungetch */
-int bufp = 0;                   /* next free position in buf */
-
-int getch(void)
-{                               /* get a (possibly pushed back) character */
-    return (bufp > 0) ? buf[--bufp] : getchar();
-}
-
-void ungetch(int c)
-{                               /* push character back on input */
-    if (bufp >= BUFSIZE)
-        printf("ungetch: too many characters\n");
-    else
-        buf[bufp++] = c;
-}
-
-void ungets(char s[])
-{                               /* push string back on input */
-    for (int i = strlen(s) - 1; i >= 0; i--) {
-        ungetch(s[i]);
-        printf("%c", i);
-    }
-}
-
-void fake_buffer(char s[])
-{
-    /* push back the fake input */
-    ungetch(EOF);
-    ungetch('\n');
-    ungets(s);
-
-    printf("%s;", s);
-}
-
-void testit(char s[])
-{
-    fake_buffer(s);
-    calculator();
-}
-
-int main()
-{
-    printf("%s;\t\t%s\n", "in", "out");
-
-    testit("1 1 +");
-    testit("2 2 *");
-    testit("2 2 2 * *");
-    testit("2 2 2 2 * * *");
-    testit("2 2 2 2 2 * * * *");
-    testit("8 5 -");
-    testit("10.8 0.5 -");
-    testit("100 10 /");
-    testit("100 11 /");
-    testit("-5 4 +");
-    testit("10 5 %");
-    testit("11 5 %");
-    testit("27 5 %");
-    testit("11.11 3.14159 %");
-    testit("9 = = =");
-    testit("9 d +");            /* test duplicate */
-    testit("100 10 /");         /* test swap */
-    testit("100 10 s /");       /* test swap */
-    testit("1 2 3 4 \n \n \n"); /* test clear stack */
-    testit("1 2 3 4 c \n \n \n");       /* test clear stack */
-    testit("1 e");              /* exp */
-    testit("1 n");              /* sin */
-    testit("3.14 n");           /* sin */
-    testit("0 n");              /* sin */
-    testit("0.5 n");            /* sin */
-    testit("2 0.5 p");          /* pow */
-    testit("2 1.0 p");          /* pow */
-    testit("2 2.0 p");          /* pow */
-    testit("2 8.0 p");          /* pow */
-    /* @ is the 'recent' or last printed variable, >is store, @is read */
-    testit("2 2 2 2 2 * >s * * @s @s +");
-    testit("1 2 3 4 \n \n \n @@ @@ *");
-    testit("2 \n @@ @@ * \n @@ @@ * \n @@ @@ * \n @@ @@ * \n @@ @@ * ");
-    testit("1 1 +");
-    testit("1 1 +");
-    testit("1 1 +");
-    /* calculator(); */
 }

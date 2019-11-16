@@ -1,3 +1,9 @@
+run: out
+	./out 2 3 4 +
+	./out 2 3 4 + =
+	./out 2 3 4 + '*'
+	./out 2 3 4 + '*' =
+	./out 2 3 4 +extra '*dfk' 
+	./out 2 3 4 +extra '*dfk' =
 out: *.c
-	gcc -Wall *.c -o out
-	./out 2 3 4 + *
+	gcc -g -Wall -lm *.c -o out
