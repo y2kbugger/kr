@@ -9,7 +9,8 @@ int TABSTOP = 8;
 int detab(char line[], int maxchars);
 int entab(char line[], int maxchars);
 
-int main(int argc, char **argv)
+int main(int argc, char **argv);
+
 int detab(char line[], int maxchars)
 {
     int c;
@@ -46,8 +47,7 @@ int entab(char line[], int maxchars)
     char linecopy[MAXLINE];
     detab(line, MAXLINE);
     strcpy(linecopy, line);
-    for (i = 0;
-         i + j <= maxchars && ((c = linecopy[i + j]) != EOF)
+    for (i = 0; i + j <= maxchars && ((c = linecopy[i + j]) != EOF)
          && (c != '\n'); i++) {
         consecutive_blanks = 0;
         while (c == ' ') {
@@ -55,6 +55,7 @@ int entab(char line[], int maxchars)
             consecutive_blanks++;
             if ((i + j + 1) % TABSTOP == 0) {
                 line[i] = '\t';
+                /* line[i] = 'Q'; */
                 i++;
                 consecutive_blanks = 0;
             }
@@ -78,17 +79,27 @@ int entab(char line[], int maxchars)
 int main(int argc, char **argv)
 {
     char s[MAXLINE];
-    int len;
-    void (*action_fxn)(char line[], int maxchars);
-    if (**argv == 'e')
-        action_fxn = &entab;
-    else if (**argv == 'd')
-        action_fxn = &detab;
-    else
+    /* int len; */
+    int (*action_fxn)(char line[], int maxchars);
+    if (argc == 1) {
+        printf("First argument should be either entab or detab\n");
         return 1;
+    }
+    argv++, argc--;
+    if (**argv == 'e') {
+        printf("running as entab\n");
+        action_fxn = &entab;
+    } else if (**argv == 'd') {
+        printf("running as detab\n");
+        action_fxn = &detab;
+    } else {
+        printf("First argument should be either entab or detab\n");
+        return 2;
+    }
 
     while (fgets(s, MAXLINE, stdin)) {
-        entab(s, MAXLINE);
+        printf("%s", s);
+        action_fxn(s, MAXLINE);
         printf("%s", s);
     }
     return 0;
