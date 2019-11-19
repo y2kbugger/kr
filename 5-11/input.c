@@ -4,7 +4,10 @@
 /* Exercise 1-21. Write a program entab that replaces strings of blanks by the minimum number of tabs and blanks to achieve the same spacing. Use the same tab stops as for detab. When either a tab or a single blank would suffice to reach a tab stop, which should be given preference? */
 
 #define MAXLINE 222
+char TAB = '#';
+/* char TAB = '\t'; */
 int TABSTOP = 8;
+int TABSTOPS[] = { 2, 4, 7, -1 };
 
 int detab(char line[]);
 int entab(char line[]);
@@ -38,32 +41,41 @@ int detab(char line[])
     return i + j;
 }
 
-int istabstop(int i)
+int istabstop(int column)
 {
-    return !(i % TABSTOP);
+    /* return !(i % TABSTOP); */
+    for (int i = 0, ts = 0; ts != -1; ts = TABSTOPS[i++]) {
+        if (column == ts) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 int entab(char line[])
 {
-    int c;
-    int orig, entabbed;
-
     detab(line);
 
+    int c;
+    int orig, entabbed;
     orig = entabbed = 0;
-    putchar('C');
-    fflush(stdin);
+
     do {
         c = line[orig++];
-        if (c == ' ' && istabstop(orig)) {
-            while (entabbed != 0 && ' ' == line[--entabbed]) {
-            }
-            printf("%d:%d|", entabbed, orig);
-            line[entabbed++] = '\t';
-        }
         line[entabbed++] = c;
+        if (c == ' ' && istabstop(orig)) {
+            printf("found usable tabstop: %d\n", orig);
+            /* backtrack the spaces and replace with TAB */
+            while (entabbed > 0 && ' ' == line[entabbed - 1]) {
+                entabbed--;
+                printf("entabbed: %d\n", entabbed);
+                ;
+            }
+            printf("putting tab at: %d\n", entabbed + 1);
+            line[entabbed++] = TAB;
+        }
     } while (c != '\0');
-    line[entabbed] = '\0';
+
     return entabbed;
 }
 
@@ -90,9 +102,9 @@ int main(int argc, char **argv)
 
     /* Loop until no more bytes are read */
     while (fgets(s, MAXLINE, stdin)) {
-        printf("???%s", s);
+        printf("?%s", s);
         action_fxn(s);
-        printf("!!!%s", s);
+        printf("!%s", s);
     }
     return 0;
 }
