@@ -6,12 +6,12 @@
 #define MAXLINE 222
 int TABSTOP = 8;
 
-int detab(char line[], int maxchars);
-int entab(char line[], int maxchars);
+int detab(char line[]);
+int entab(char line[]);
 
 int main(int argc, char **argv);
 
-int detab(char line[], int maxchars)
+int detab(char line[])
 {
     int c;
     int i, j;
@@ -19,7 +19,7 @@ int detab(char line[], int maxchars)
     char linecopy[MAXLINE];
     strcpy(linecopy, line);
     for (i = 0;
-         i + j <= maxchars && ((c = linecopy[i]) != EOF) && (c != '\n');
+         i + j <= MAXLINE && ((c = linecopy[i]) != EOF) && (c != '\n');
          i++) {
         if (c == '\t') {
             c = ' ';
@@ -38,49 +38,40 @@ int detab(char line[], int maxchars)
     return i + j;
 }
 
-int entab(char line[], int maxchars)
+int istabstop(int i)
+{
+    return !(i % TABSTOP);
+}
+
+int entab(char line[])
 {
     int c;
-    int i, j;
-    int consecutive_blanks;
-    j = 0;
-    char linecopy[MAXLINE];
-    detab(line, MAXLINE);
-    strcpy(linecopy, line);
-    for (i = 0; i + j <= maxchars && ((c = linecopy[i + j]) != EOF)
-         && (c != '\n'); i++) {
-        consecutive_blanks = 0;
-        while (c == ' ') {
-            j++;
-            consecutive_blanks++;
-            if ((i + j + 1) % TABSTOP == 0) {
-                line[i] = '\t';
-                /* line[i] = 'Q'; */
-                i++;
-                consecutive_blanks = 0;
+    int orig, entabbed;
+
+    detab(line);
+
+    orig = entabbed = 0;
+    putchar('C');
+    fflush(stdin);
+    do {
+        c = line[orig++];
+        if (c == ' ' && istabstop(orig)) {
+            while (entabbed != 0 && ' ' == line[--entabbed]) {
             }
-            c = linecopy[i + j];
+            printf("%d:%d|", entabbed, orig);
+            line[entabbed++] = '\t';
         }
-        for (; consecutive_blanks > 0; consecutive_blanks--) {
-            line[i] = ' ';
-            i++;
-            j--;
-        }
-        line[i] = c;
-    }
-    if (c == '\n') {
-        line[i] = c;
-        ++i;
-    }
-    line[i] = '\0';
-    return i;
+        line[entabbed++] = c;
+    } while (c != '\0');
+    line[entabbed] = '\0';
+    return entabbed;
 }
 
 int main(int argc, char **argv)
 {
     char s[MAXLINE];
     /* int len; */
-    int (*action_fxn)(char line[], int maxchars);
+    int (*action_fxn)(char line[]);
     if (argc == 1) {
         printf("First argument should be either entab or detab\n");
         return 1;
@@ -97,10 +88,11 @@ int main(int argc, char **argv)
         return 2;
     }
 
+    /* Loop until no more bytes are read */
     while (fgets(s, MAXLINE, stdin)) {
-        printf("%s", s);
-        action_fxn(s, MAXLINE);
-        printf("%s", s);
+        printf("???%s", s);
+        action_fxn(s);
+        printf("!!!%s", s);
     }
     return 0;
 }
