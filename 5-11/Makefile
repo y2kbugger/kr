@@ -1,5 +1,5 @@
 run: out
-	./out || echo "This is supposed to fail, because we didn't specify mode"
-	cat entabtests | xargs -n2 sh -c 'cat entabtestsdata | ./out e $@ | cat -T'
+	./tests.sh
+
 out: *.c
-	gcc -g -Wall -lm *.c -o out
+	gcc -ggdb3 -Wall -lm *.c -o out

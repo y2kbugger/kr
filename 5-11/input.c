@@ -7,52 +7,68 @@
 char TAB = '#';
 /* char TAB = '\t'; */
 int TABSTOP = 8;
-int TABSTOPS[] = { 2, 4, 7, -1 };
+int TABSTOPS[256] = { -1 };
 
-int detab(char line[]);
-int entab(char line[]);
+void detab(char line[]);
+void entab(char line[]);
+int istabstop(int column);
 
 int main(int argc, char **argv);
 
-int detab(char line[])
+void detab(char line[])
 {
     int c;
     int i, j;
+    int output_column;
     j = 0;
     char linecopy[MAXLINE];
     strcpy(linecopy, line);
     for (i = 0;
          i + j <= MAXLINE && ((c = linecopy[i]) != EOF) && (c != '\n');
          i++) {
-        if (c == '\t') {
+        if (c == TAB) {
             c = ' ';
-            while ((i + j + 1) % TABSTOP != 0) {
-                line[i + j] = c;
-                j++;
+            while (!istabstop(i + j + 1 + 1)) { // one for column versus index, one for lookahead.
+                line[i + j++] = c;
             }
         }
         line[i + j] = c;
     }
     if (c == '\n') {
-        line[i + j] = c;
-        ++i;
+        line[i++ + j] = c;
     }
     line[i + j] = '\0';
-    return i + j;
 }
 
+//Check based on column number, not line char index
 int istabstop(int column)
 {
-    /* return !(i % TABSTOP); */
+    if (column == 0) {
+        printf("Warning Checking non-existant column (0)");
+        return;
+    }
+
+    int max_ts = 0;
+    /* see if it matches a manually set tabstop */
     for (int i = 0, ts = 0; ts != -1; ts = TABSTOPS[i++]) {
+        /* find the furthest right tabstop */
+        if (ts > max_ts) {
+            max_ts = ts;
+        }
         if (column == ts) {
             return 1;
         }
     }
-    return 0;
+    if (column < max_ts)
+        return 0;
+
+    /* See if it matches an automatic tabstop,
+     * Set equal spacing past furthest tabstop */
+    return !((((column - 1) - max_ts)) % TABSTOP);
+
 }
 
-int entab(char line[])
+void entab(char line[])
 {
     detab(line);
 
@@ -64,41 +80,84 @@ int entab(char line[])
         c = line[orig++];
         line[entabbed++] = c;
         if (c == ' ' && istabstop(orig)) {
-            printf("found usable tabstop: %d\n", orig);
             /* backtrack the spaces and replace with TAB */
             while (entabbed > 0 && ' ' == line[entabbed - 1]) {
                 entabbed--;
-                printf("entabbed: %d\n", entabbed);
-                ;
             }
-            printf("putting tab at: %d\n", entabbed + 1);
             line[entabbed++] = TAB;
         }
     } while (c != '\0');
+}
 
-    return entabbed;
+void compare_istabstop(int column)
+{
+
+    int via_defaults;
+    int via_explicit;
+    int via_semiexplicit;
+    TABSTOP = 8;
+
+    TABSTOPS[0] = -1;
+    via_defaults = istabstop(column);
+
+    TABSTOPS[0] = 9;
+    TABSTOPS[1] = 17;
+    TABSTOPS[2] = 25;
+    TABSTOPS[3] = 33;
+    TABSTOPS[4] = 41;
+    TABSTOPS[5] = 49;
+    TABSTOPS[6] = -1;
+    via_explicit = istabstop(column);
+
+
+    TABSTOPS[0] = 9;
+    TABSTOPS[1] = -1;
+    via_semiexplicit = istabstop(column);
+
+    if (via_explicit != via_defaults)
+        printf
+            ("istabstop defaults vs semi-explicit (single explicit + default spacing are mismatched on column %d\n",
+             column);
+print test results as table} void tests(char line[])
+{
+    printf("Test suite ignores all stdin and command line tabstops");
+    printf("Testing that istabstop matches defaults vs explicit");
+    for (int i = 1; i < 45; i++)
+        compare_istabstop(i);
 }
 
 int main(int argc, char **argv)
 {
     char s[MAXLINE];
     /* int len; */
-    int (*action_fxn)(char line[]);
+    void (*action_fxn)(char line[]);
     if (argc == 1) {
         printf("First argument should be either entab or detab\n");
         return 1;
     }
     argv++, argc--;
     if (**argv == 'e') {
-        printf("running as entab\n");
+        /* printf("running as entab\n"); */
         action_fxn = &entab;
     } else if (**argv == 'd') {
-        printf("running as detab\n");
+        /* printf("running as detab\n"); */
         action_fxn = &detab;
+    } else if (**argv == 't') {
+        /* printf("running tests\n"); */
+        action_fxn = &tests;
     } else {
-        printf("First argument should be either entab or detab\n");
+        printf
+            ("First argument should be either entab or detab or tests\n");
         return 2;
     }
+
+    // Read in tabstops from cli
+    int tbs = 0;
+    while (argc > 1) {
+        argv++, argc--;
+        TABSTOPS[tbs++] = atoi(*argv);
+    }
+    TABSTOPS[tbs] = -1;
 
     /* Loop until no more bytes are read */
     while (fgets(s, MAXLINE, stdin)) {
