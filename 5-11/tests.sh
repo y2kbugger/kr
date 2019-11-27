@@ -15,7 +15,6 @@ printf "Test Suit"
 echo "./out t $2";
 echo "$1" | ./out t $2;
 
-exit
 
 printf "?Input\n"
 printf "!Result\n"
@@ -57,7 +56,7 @@ out "hello"
 din "#Hello" "4"
 out "   Hello"
 din "#H#e#l#l#o" "4 7 13 19"
-out "   H  e     l     l        o"
+out "   H  e     l     l       o"
 
 
 #test tabstops too close

@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 /* Exercise 1-21. Write a program entab that replaces strings of blanks by the minimum number of tabs and blanks to achieve the same spacing. Use the same tab stops as for detab. When either a tab or a single blank would suffice to reach a tab stop, which should be given preference? */
 
@@ -19,7 +21,6 @@ void detab(char line[])
 {
     int c;
     int i, j;
-    int output_column;
     j = 0;
     char linecopy[MAXLINE];
     strcpy(linecopy, line);
@@ -45,10 +46,14 @@ int istabstop(int column)
 {
     if (column == 0) {
         printf("Warning Checking non-existant column (0)");
-        return;
+        return -1;
+    }
+    if (column == 1) {
+        /* No such thing as 1 being a useful tabstop */
+        return 0;
     }
 
-    int max_ts = 0;
+    int max_ts = 1;
     /* see if it matches a manually set tabstop */
     for (int i = 0, ts = 0; ts != -1; ts = TABSTOPS[i++]) {
         /* find the furthest right tabstop */
@@ -64,7 +69,7 @@ int istabstop(int column)
 
     /* See if it matches an automatic tabstop,
      * Set equal spacing past furthest tabstop */
-    return !((((column - 1) - max_ts)) % TABSTOP);
+    return !((((column) - max_ts)) % TABSTOP);
 
 }
 
@@ -89,6 +94,7 @@ void entab(char line[])
     } while (c != '\0');
 }
 
+#define LOUD(x) "\033[0;31m" x "\033[0m"
 void compare_istabstop(int column)
 {
 
@@ -114,14 +120,24 @@ void compare_istabstop(int column)
     TABSTOPS[1] = -1;
     via_semiexplicit = istabstop(column);
 
-    if (via_explicit != via_defaults)
-        printf
-            ("istabstop defaults vs semi-explicit (single explicit + default spacing are mismatched on column %d\n",
-             column);
-print test results as table} void tests(char line[])
+    printf("%4d", column);
+    printf("%8d", via_defaults);
+    if ((via_defaults != via_explicit) && isatty(1))
+        printf(LOUD("%13d"), via_explicit);
+    else
+        printf("%13d", via_explicit);
+    if (via_defaults != via_semiexplicit && isatty(1))
+        printf(LOUD("%12d"), via_semiexplicit);
+    else
+        printf("%12d", via_semiexplicit);
+    printf("\n");
+}
+
+void tests(char line[])
 {
-    printf("Test suite ignores all stdin and command line tabstops");
-    printf("Testing that istabstop matches defaults vs explicit");
+    printf("Test suite ignores all stdin and command line tabstops\n");
+    printf("Testing that istabstop matches defaults vs explicit\n");
+    printf("Column    Defaults    Explicit    SemiExplicit\n");
     for (int i = 1; i < 45; i++)
         compare_istabstop(i);
 }
