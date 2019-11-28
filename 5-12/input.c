@@ -7,7 +7,8 @@
  *
  *     entab -m +n
  *
- * to mean tab stops every n columns, starting at column m. Choose convenient (for the user) default behavior. */
+ * to mean tab stops every n columns, starting at column m. Choose convenient
+ * (for the user) default behavior. */
 
 #define MAXLINE 222
 char TAB = '#';
@@ -33,7 +34,8 @@ void detab(char line[])
          i++) {
         if (c == TAB) {
             c = ' ';
-            while (!istabstop(i + j + 1 + 1)) { // one for column versus index, one for lookahead.
+            /* one for column versus index, one for lookahead. */
+            while (!istabstop(i + j + 1 + 1)) {
                 line[i + j++] = c;
             }
         }
@@ -45,7 +47,7 @@ void detab(char line[])
     line[i + j] = '\0';
 }
 
-//Check based on column number, not line char index
+/* Check based on column number, not line char index */
 int istabstop(int column)
 {
     if (column == 0) {
@@ -88,7 +90,7 @@ void entab(char line[])
     do {
         c = line[orig++];
         line[entabbed++] = c;
-        if (c == ' ' && istabstop(orig)) {
+        if (c == ' ' && istabstop(orig + 1)) {
             /* backtrack the spaces and replace with TAB */
             while (entabbed > 0 && ' ' == line[entabbed - 1]) {
                 entabbed--;
@@ -137,6 +139,7 @@ void compare_istabstop(int column)
     printf("\n");
 }
 
+
 void tests(char line[])
 {
     printf("Test suite ignores all stdin and command line tabstops\n");
@@ -171,10 +174,13 @@ int main(int argc, char **argv)
         return 2;
     }
 
-    // Read in tabstops from cli
+    /* Read in tabstops from cli */
     int tbs = 0;
     while (argc > 1) {
         argv++, argc--;
+        /* One or more explicit tabstops */
+        /* if (*argv[0] == '-') */
+        /* *argv++; */
         TABSTOPS[tbs++] = atoi(*argv);
     }
     TABSTOPS[tbs] = -1;

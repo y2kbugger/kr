@@ -6,7 +6,7 @@ function din () {
 }
 function ein () {
     echo "./out e $2";
-    echo "$1@" | ./out e $2; 
+    echo "$1" | ./out e $2;
 }
 function out  () { printf "@$@\n\n"; }
 
@@ -20,7 +20,9 @@ printf "?Input\n"
 printf "!Result\n"
 printf "@Expected\n\n"
 
-printf "detab tests\n\n"
+printf "##########################\n"
+printf "detab tests\n"
+printf "##########################\n\n"
 
 din "Hello"
 out "Hello"
@@ -104,64 +106,91 @@ din "Ohhhhhhhh#world" "9"
 din "Ohhhhhhhh#world"
 out "Ohhhhhhhh       world"
 
-exit
 
-din "Hello, #world" "2 4 6 8 10 12 14 16 18"
-out "Hello,   world"
+printf "##########################\n"
+printf "entab tests\n"
+printf "##########################\n\n"
 
-din "	Hello, world"
-out "        Hello, world"
+ein "Hello"
+out "Hello"
 
-din "	Hello, world" "2 2 2 2 2"
-out "  Hello, world"
+ein "        Hello"
+out "#Hello"
 
-din "	Hello, world" "4 4 4 4 4"
-out "    Hello, world"
-
-din "		Hello, world"
-
-din "		Hello, world"
-
-din "		Hello, world"
-
-din "    Hello, world"
-
-din "     Hello, world"
-
-din "      Hello, world"
-
-din "       Hello, world"
-
-din "        Hello, world"
-
-din "         Hello, world"
-
-din "          Hello, world"
-
-din "           Hello, world"
+ein "        Hello" "9 17"
+out "#Hello"
 
 
-printf "entab tests\n\n"
+ein "                Hello"
+out "##Hello"
+ein "                Hello" "9 17"
+out "##Hello"
 
-echo "Hello" | ./out e
-printf "@Hello\n\n"
+ein "       Hello"
+out "       Hello"
 
-echo    "       Hello" | ./out e
-printf "@       Hello\n\n"
+ein "        Hello"
+out "#Hello"
 
-echo    "        Hello" | ./out e
-printf "@#Hello\n\n"
+ein "         Hello"
+out "# Hello"
 
-echo    "Hello, world" | ./out e
-echo    "	Hello, world" | ./out e
-echo    "		Hello, world" | ./out e
-echo    "		Hello, world" | ./out e
-echo    "		Hello, world" | ./out e
-echo    "    Hello, world" | ./out e
-echo    "     Hello, world" | ./out e
-echo    "      Hello, world" | ./out e
-echo    "       Hello, world" | ./out e
-echo    "        Hello, world8" | ./out e
-echo    "         Hello, world" | ./out e
-echo    "          Hello, world" | ./out e
-echo    "           Hello, world" | ./out e
+ein "         Hello" "24"
+out "#        Hello"
+
+ein "         Hello" "4"
+out "#      Hello"
+
+ein "hello" "4"
+out "hello"
+
+ein "   Hello" "4"
+out "#Hello"
+
+ein "   H  e     l     l       o" "4 7 13 19"
+out "#H#e#l#l#o"
+
+#test tabstops too close
+ein "   H  e     l     l    o" "4 7 13 19 20 24"
+out "#H#e#l#l#o"
+
+ein "Hello,  world"
+out "Hello,#world"
+
+ein "Hello, world" "8"
+out "Hello,#world"
+
+ein "Hello,  world" "9"
+out "Hello,#world"
+
+ein "Oh      world" "9"
+ein "Oh      world"
+out "Oh#world"
+
+ein "Ohh     world" "9"
+ein "Ohh     world"
+out "Ohh#world"
+
+ein "Ohhh    world" "9"
+ein "Ohhh    world"
+out "Ohhh#world"
+
+ein "Ohhhh   world" "9"
+ein "Ohhhh   world"
+out "Ohhhh#world"
+
+ein "Ohhhhh  world" "9"
+ein "Ohhhhh  world"
+out "Ohhhhh#world"
+
+ein "Ohhhhhh world" "9"
+ein "Ohhhhhh world"
+out "Ohhhhhh#world"
+
+ein "Ohhhhhhh        world" "9"
+ein "Ohhhhhhh        world"
+out "Ohhhhhhh#world"
+
+ein "Ohhhhhhhh       world" "9"
+ein "Ohhhhhhhh       world"
+out "Ohhhhhhhh#world"
