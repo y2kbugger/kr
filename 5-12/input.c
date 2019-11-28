@@ -179,8 +179,17 @@ int main(int argc, char **argv)
     while (argc > 1) {
         argv++, argc--;
         /* One or more explicit tabstops */
-        /* if (*argv[0] == '-') */
-        /* *argv++; */
+
+        if (**argv == '+') {
+            (*argv)++;
+            TABSTOP = atoi(*argv);
+            continue;
+        }
+
+        if (**argv == '-') {
+            /* just use these as regular tabstops */
+            (*argv)++;
+        }
         TABSTOPS[tbs++] = atoi(*argv);
     }
     TABSTOPS[tbs] = -1;

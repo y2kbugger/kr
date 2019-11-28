@@ -194,3 +194,39 @@ out "Ohhhhhhh#world"
 ein "Ohhhhhhhh       world" "9"
 ein "Ohhhhhhhh       world"
 out "Ohhhhhhhh#world"
+
+# Test 5-12 method of - prefix for explicit tabstops and + for the default tabstop width value
+din "Ohhhhhhhh#world"
+din "Ohhhhhhhh#world" "9"
+din "Ohhhhhhhh#world" "-9"
+din "Ohhhhhhhh#world" "+8"
+din "Ohhhhhhhh#world" "-9 +8"
+din "Ohhhhhhhh#world" "+8 -9"
+out "Ohhhhhhhh       world"
+
+ein "Ohhhhhhhh       world"
+ein "Ohhhhhhhh       world" "9"
+ein "Ohhhhhhhh       world" "-9"
+ein "Ohhhhhhhh       world" "+8"
+ein "Ohhhhhhhh       world" "-9 +8"
+ein "Ohhhhhhhh       world" "+8 -9"
+out "Ohhhhhhhh#world"
+
+
+din "Ohhhhhhhh#world" "14"
+din "Ohhhhhhhh#world" "-14"
+out "Ohhhhhhhh    world"
+
+ein "Ohhhhhhhh    world" "14"
+ein "Ohhhhhhhh    world" "-14"
+out "Ohhhhhhhh#world"
+
+
+din "Ohhhhhhhh#w#E#d" "14"
+din "Ohhhhhhhh#w#E#d" "-14"
+out "Ohhhhhhhh    w       E       d"
+
+
+din "Ohhhhhhhh#w#E#d" "-16 +4"
+out "Ohhhhhhhh      w   E   d"
+#                   .   .   .
