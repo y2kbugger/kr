@@ -84,7 +84,7 @@ void entab(char line[])
     do {
         c = line[orig++];
         line[entabbed++] = c;
-        if (c == ' ' && istabstop(orig)) {
+        if (c == ' ' && istabstop(orig + 1)) {
             /* backtrack the spaces and replace with TAB */
             while (entabbed > 0 && ' ' == line[entabbed - 1]) {
                 entabbed--;
