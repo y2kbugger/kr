@@ -42,11 +42,11 @@ void printlines()
     /* No lines */
     if ((lines == lines_start) && (*lines == NULL))
         return;
-    ++lines;
     /* Skip unused line slots, traversing ring buffer. */
-    while (*lines == NULL)
+    do {
         if (++lines >= lines_end)
             lines -= n;
+    } while (*lines == NULL);
 
     /* Print ring buffer of input lines */
     while (*lines != NULL) {
@@ -61,6 +61,24 @@ void printlines()
 
 int main(int argc, char **argv)
 {
+    if (argc > 2) {
+        printf("Dont supply more than 1 arg\n");
+        exit(-1);
+    }
+
+    if (argc == 2) {
+        argv++;
+        if (**argv == '-') {
+            (*argv)++;
+            n = atoi(*argv);
+        } else {
+            printf("argument must be in form: -INT\n");
+            exit(-1);
+        }
+    }
+    if (n == 0)
+        exit(0);
+
     /* initialize ring buffer for line pointers */
     lines = malloc(n * sizeof(char *));
     lines_start = lines;
@@ -75,5 +93,5 @@ int main(int argc, char **argv)
         putline(line);
     }
     printlines();
-    return 0;
+    exit(0);
 }
