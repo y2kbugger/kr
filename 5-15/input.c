@@ -1,5 +1,4 @@
-/* Exercise 5-14. Modify the sort program to handle a -r flag, which indicates
- * sorting in reverse (decreasing) order. Be sure that -r works with -n. */
+/* Exercise 5-15. Add the option -f to fold upper and lower case together, so that case distinctions are not made during sorting; for example, a and A compare equal. */
 
 #include <stdio.h>
 #include <string.h>
@@ -12,12 +11,15 @@ int readlines(char *lineptr[], int nlines);
 void writelines(char *lineptr[], int nlines);
 
 typedef int (*Comp)(void *, void *);
-void precmp(char *s);
+char *precmp(char *s);
 int cmp(void *, void *);
 void postcmp(int *);
 
 
 void myqsort(void *lineptr[], int left, int right, Comp);
+
+int foldem = 0;
+void fold(char *);
 
 int numeric = 0;                /* 1 if numeric sort */
 int numcmp(char *, char *);
@@ -83,8 +85,12 @@ int main(int argc, char *argv[])
         argv++;
         if (strcmp(*argv, "-n") == 0)
             numeric = 1;
-        if (strcmp(*argv, "-r") == 0)
+        else if (strcmp(*argv, "-r") == 0)
             reversed = 1;
+        else if (strcmp(*argv, "-f") == 0)
+            foldem = 1;
+        else
+            printf("unknown arg: '%s'", *argv);
     }
     if ((nlines = readlines(lineptr, MAXLINES)) >= 0) {
         myqsort((void **) lineptr, 0, nlines - 1, cmp);
@@ -114,14 +120,29 @@ void myqsort(void *v[], int left, int right, Comp comp)
     myqsort(v, last + 1, right, comp);
 }
 
-/* mutate strings before cmp*/
-void precmp(char *s)
+/* return mutated strings before cmp*/
+char *precmp(char *s)
 {
+    char *news = malloc((strlen(s) + 1) * sizeof(char));
+    strcpy(news, s);
+    fold(news);
+    return news;
+}
 
+void fold(char *s)
+{
+    if (foldem) {
+        while (*s != '\0') {
+            *s = tolower(*(s));
+            s++;
+        }
+    }
 }
 
 int cmp(void *left, void *right)
 {
+    left = precmp(left);
+    right = precmp(right);
     Comp sorter = (numeric ? (Comp) numcmp : (Comp) strcmp);
     int result = sorter(left, right);
     postcmp(&result);
