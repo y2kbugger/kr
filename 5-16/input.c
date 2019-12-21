@@ -24,6 +24,9 @@ void myqsort(void *lineptr[], int left, int right, Comp);
 int foldem = 0;
 void fold(char *);
 
+int directoryorder = 0;
+void directoryorderer(char *);
+
 int numeric = 0;                /* 1 if numeric sort */
 int numcmp(char *, char *);
 
@@ -92,6 +95,8 @@ int main(int argc, char *argv[])
             reversed = 1;
         else if (strcmp(*argv, "-f") == 0)
             foldem = 1;
+        else if (strcmp(*argv, "-d") == 0)
+            directoryorder = 1;
         else
             printf("unknown arg: '%s'", *argv);
     }
