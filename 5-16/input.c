@@ -1,4 +1,8 @@
-/* Exercise 5-16.Add the -d (“directory order”) option, which makes comparisons only on letters, numbers and blanks. Make sure it works in conjunction with -f. */
+/* Exercise 5-16. Add the -d (“directory order”) option, which makes
+ * comparisons only on letters, numbers and blanks. Make sure it works in
+ * conjunction with
+ * -f. */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -128,16 +132,6 @@ char *precmp(char *s)
     return news;
 }
 
-void fold(char *s)
-{
-    if (foldem) {
-        while (*s != '\0') {
-            *s = tolower(*(s));
-            s++;
-        }
-    }
-}
-
 int cmp(void *left, void *right)
 {
     left = precmp(left);
@@ -168,6 +162,17 @@ void postcmp(int *result)
 {
     reverse(result);
 }
+
+void fold(char *s)
+{
+    if (foldem) {
+        while (*s != '\0') {
+            *s = tolower(*(s));
+            s++;
+        }
+    }
+}
+
 
 void reverse(int *result)
 {
