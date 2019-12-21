@@ -7,6 +7,8 @@ run: out
 	./out -n -r < ./lines.txt
 	echo fold/ignorecase:
 	./out -f < ./linesalphanum.txt
+	echo directory order alpha numeric + ' ' only
+	./out -d < ./linesalphanum.txt
 
 out: input.c
 	gcc -O0 -g *.c -o out
