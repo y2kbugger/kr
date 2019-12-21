@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #define MAXLINES 5000           /* max #lines to be sorted */
 char *lineptr[MAXLINES];        /* pointers to text lines */
@@ -134,6 +135,7 @@ char *precmp(char *s)
     char *news = malloc((strlen(s) + 1) * sizeof(char));
     strcpy(news, s);
     fold(news);
+    directoryorderer(news);
     return news;
 }
 
@@ -172,7 +174,7 @@ void fold(char *s)
 {
     if (foldem) {
         while (*s != '\0') {
-            *s = tolower(*(s));
+            *s = tolower(*s);
             s++;
         }
     }
@@ -183,4 +185,19 @@ void reverse(int *result)
 {
     if (reversed)
         *result *= -1;
+}
+
+void directoryorderer(char *s)
+{
+
+    char *sprime = s;
+
+    if (directoryorder) {
+        while (*s != '\0') {
+            if (isalnum(*s) || (*s == ' '))
+                *sprime++ = *s++;
+            else
+                *s++;
+        }
+    }
 }
