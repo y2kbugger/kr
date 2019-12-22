@@ -12,6 +12,10 @@
 #define MAXLINES 5000           /* max #lines to be sorted */
 char *lineptr[MAXLINES];        /* pointers to text lines */
 
+/* zero is no fields, otherwise it is the field number starting with 1, space
+ * separated. */
+int field = 0;
+
 int readlines(char *lineptr[], int nlines);
 void writelines(char *lineptr[], int nlines);
 
@@ -99,7 +103,11 @@ int main(int argc, char *argv[])
             foldem = 1;
         else if (strcmp(*argv, "-d") == 0)
             directoryorder = 1;
-        else
+        else if (strcmp(*argv, "-c") == 0) {
+            argv++;
+            argc--;
+            field = atoi(*argv);
+        } else
             printf("unknown arg: '%s'", *argv);
     }
     if ((nlines = readlines(lineptr, MAXLINES)) >= 0) {
