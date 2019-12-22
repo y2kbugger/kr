@@ -9,6 +9,8 @@ run: out
 	./out -f < ./linesalphanum.txt
 	echo directory order alpha numeric + ' ' only
 	./out -d < ./linesalphanum.txt
+	echo two fields
+	cat ./linestwofields.txt | ./out -n -c1 | ./out -r -c2
 
 out: input.c
 	gcc -O0 -g *.c -o out
