@@ -2,7 +2,18 @@
  * fields within lines, each field sorted according to an independent set of
  * options. (The index for this book was sorted with -df for the index category
  * and -n for the page numbers.)
+ *
+ * You can sort by any field using -c
+ *
+ * To sort by multiple fields, use unix piplines sorting from left to right:
+ * least to most significant.
+ *
+ * e.g.
+ *
+ *     cat ./linestwofields.txt | ./out -f -d -c 2 | ./out -c 1 -n
  */
+
+
 
 #include <stdio.h>
 #include <string.h>
