@@ -146,7 +146,7 @@ void merge(void *v[], int l, int m, int r, Comp comp)
     j = 0;                      // Initial index of second subarray
     k = l;                      // Initial index of merged subarray
     while (i < n1 && j < n2) {
-        if (comp(L[i], R[j]) = <0) {    // need boolean compare, quicksort used lessthan, equal, or greaterthan
+        if (comp(L[i], R[j]) <= 0) {    // need boolean compare, quicksort used lessthan, equal, or greaterthan
             v[k] = L[i];
             i++;
         } else {
