@@ -12,9 +12,6 @@
 #define MAXLINES 5000           /* max #lines to be sorted */
 char *lineptr[MAXLINES];        /* pointers to text lines */
 
-/* zero is no fields, otherwise it is the field number starting with 1, space
- * separated. */
-int field = 0;
 
 int readlines(char *lineptr[], int nlines);
 void writelines(char *lineptr[], int nlines);
@@ -32,6 +29,11 @@ void fold(char *);
 
 int directoryorder = 0;
 void directoryorderer(char *);
+
+/* zero is no fields, otherwise it is the field number starting with 1, space
+ * separated. */
+int field = 0;
+void extractfield(char *);
 
 int numeric = 0;                /* 1 if numeric sort */
 int numcmp(char *, char *);
@@ -143,6 +145,7 @@ char *precmp(char *s)
 {
     char *news = malloc((strlen(s) + 1) * sizeof(char));
     strcpy(news, s);
+    extractfield(news);
     fold(news);
     directoryorderer(news);
     return news;
@@ -181,11 +184,12 @@ void postcmp(int *result)
 
 void fold(char *s)
 {
-    if (foldem) {
-        while (*s != '\0') {
-            *s = tolower(*s);
-            s++;
-        }
+    if (!foldem)
+        return;
+
+    while (*s != '\0') {
+        *s = tolower(*s);
+        s++;
     }
 }
 
@@ -198,15 +202,43 @@ void reverse(int *result)
 
 void directoryorderer(char *s)
 {
+    if (!directoryorder)
+        return;
 
     char *sprime = s;
-
-    if (directoryorder) {
-        while (*s != '\0') {
-            if (isalnum(*s) || (*s == ' '))
-                *sprime++ = *s++;
-            else
-                *s++;
-        }
+    while (*s != '\0') {
+        if (isalnum(*s) || (*s == ' '))
+            *sprime++ = *s++;
+        else
+            *s++;
     }
+}
+
+SEP = ' ';
+void extractfield(char *s)
+{
+    if (!field)
+        return;
+
+    char *s_orig = s;           // debugging only
+    char *sprime = s;
+    int currentfield = 1;
+    while (currentfield < field) {
+        s++;
+        if (*s == SEP)
+            currentfield++, s++;
+        if (*s == '\0')
+            goto FIELDERROR;
+    }
+    while (currentfield == field) {
+        *sprime++ = *s++;
+        if (*s == SEP || *s == '\0')
+            currentfield++, s++;
+    }
+    *sprime++ = '\0';
+    return;
+
+  FIELDERROR:
+    printf("Not enough fields in input.\n");
+    exit(1);
 }
