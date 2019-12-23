@@ -113,12 +113,80 @@ int main(int argc, char *argv[])
             printf("unknown arg: '%s'", *argv);
     }
     if ((nlines = readlines(lineptr, MAXLINES)) >= 0) {
-        myqsort((void **) lineptr, 0, nlines - 1, cmp);
+        /* myqsort((void **) lineptr, 0, nlines - 1, cmp); */
+        mergeSort((void **) lineptr, 0, nlines - 1, cmp);
         writelines(lineptr, nlines);
         return 0;
     } else {
         printf("input too big to sort\n");
         return 1;
+    }
+}
+
+// Merges two subarrays of arr[].
+// First subarray is arr[l..m]
+// Second subarray is arr[m+1..r]
+void merge(void *v[], int l, int m, int r, Comp comp)
+{
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 = r - m;
+
+    /* create temp arrays */
+    void *L[n1], *R[n2];
+
+    /* Copy data to temp arrays L[] and R[] */
+    for (i = 0; i < n1; i++)
+        L[i] = v[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = v[m + 1 + j];
+
+    /* Merge the temp arrays back into v[l..r] */
+    i = 0;                      // Initial index of first subarray
+    j = 0;                      // Initial index of second subarray
+    k = l;                      // Initial index of merged subarray
+    while (i < n1 && j < n2) {
+        if (comp(L[i], R[j]) = <0) {    // need boolean compare, quicksort used lessthan, equal, or greaterthan
+            v[k] = L[i];
+            i++;
+        } else {
+            v[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    /* Copy the remaining elements of L[], if there
+       are any */
+    while (i < n1) {
+        v[k] = L[i];
+        i++;
+        k++;
+    }
+
+    /* Copy the remaining elements of R[], if there
+       are any */
+    while (j < n2) {
+        v[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+/* l is for left index and r is right index of the
+   sub-array of v to be sorted */
+void mergeSort(void *v[], int l, int r, Comp comp)
+{
+    if (l < r) {
+        // Same as (l+r)/2, but avoids overflow for
+        // large l and h
+        int m = l + (r - l) / 2;
+
+        // Sort first and second halves
+        mergeSort(v, l, m, comp);
+        mergeSort(v, m + 1, r, comp);
+
+        merge(v, l, m, r, comp);
     }
 }
 
@@ -214,7 +282,7 @@ void directoryorderer(char *s)
     }
 }
 
-SEP = ' ';
+char SEP = ' ';
 void extractfield(char *s)
 {
     if (!field)
