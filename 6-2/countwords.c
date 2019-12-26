@@ -12,7 +12,7 @@
  * A:
  *  I think we can store them all and separate into groups while printing
  *
- * What do they mean by "groups?"
+ * What do they mean by "groups?" what about printed like:
  *
  *   hello
  *
@@ -20,9 +20,48 @@
  *   goodbyeworld
  *
  *   zebrafoot
- * */
+ *
+ *
+ * Example of how it could be stored as tree:
+ *
+ *        goodbye
+ *       /      \
+ *   hello     goodbyeworld
+ *                   \
+ *                   zebrafoot
+ */
 
 #include <stdlib.h>
+
+
+struct WordNode {
+    char *word;
+    struct WordNode *left;
+    struct WordNode *right;
+};
+
+void print_words(struct WordNode *rootnode);
+
+/* Data for testing the printing program */
+
+struct WordNode testtree = {
+    "goodbye",
+    NULL,
+    NULL
+};
+
+/* struct WordNode { "hello", */
+    /*                  0, */
+    /*                  0 }; */
+    /* , struct WordNode { */
+    /*     "goodbyeworld", 0, struct WordNode { */
+    /*     "zebrafoot", 0, 0}; */
+    /* }; */
+
+/* Command Line Settings */
+int TEST = 1;
+
+/* on by default for now, until we add arg handling */
 
 int main()
 {
@@ -38,16 +77,19 @@ int main()
 
 
     /* print out the "variable names" in groups */
-
+    if (TEST)
+        print_words(&testtree);
     exit(0);
 }
 
-print_words(*words)
+void print_words(struct WordNode *rootnode)
 {
     ;
 }
 
-get_word()
+char *get_word()
 {
-    ;
+    char *word;
+    word = "placeholder";
+    return word;
 }
