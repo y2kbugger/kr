@@ -36,6 +36,10 @@ testdcl: dcl
 	@echo -------------
 	echo 'char (*(*x[3])())[5]' | ./dcl
 	@echo 'x:  array[3] of pointer to function returning pointer to array[5] of char'
+	
+	@echo 'Now for invalid inputs'
+	@echo 'Missing closing paren.'
+	echo 'char (*(*x[3])()[5]' | ./dcl
 
 clean:
 	rm *.o *~
