@@ -15,7 +15,12 @@ struct key {
 
 int getword(char *, int);
 int binsearch(char *, struct key *, int);
+int is_word_char(char s);
 
+#define MAXWORD 100
+const char *faketest = "goodyear";
+
+/*yeargood*/
 
 struct key keytab[] = {
     { "auto", 0 },
@@ -25,10 +30,15 @@ struct key keytab[] = {
     { "const", 0 },
     { "continue", 0 },
     { "default", 0 },
+    { "define", 0 },
+    { "faketest", 0 },
+    { "goodyear", 0 },
     { "unsigned", 0 },
     { "void", 0 },
     { "volatile", 0 },
     { "while", 0 },
+    { "yeargood", 0 },
+    { "zear_good", 0 },
 };
 
 #define  NKEYS  (sizeof keytab / sizeof keytab[0])
@@ -57,7 +67,7 @@ int main()
     int n;
     char word[MAXWORD];
     while (getword(word, MAXWORD) != EOF)
-        if (isalpha(word[0]))
+        if (is_word_char(word[0]))
             if ((n = binsearch(word, keytab, NKEYS)) >= 0)
                 keytab[n].count++;
     for (n = 0; n < NKEYS; n++)
@@ -86,6 +96,15 @@ int binsearch(char *word, struct key *tab, int n)
     return -1;
 }
 
+int is_word_char(char s)
+{
+    if (isalnum(s))
+        return 1;
+    if (s == '_')
+        return 1;
+    return 0;
+}
+
 /* getword:  get next word or character from input */
 int getword(char *word, int lim)
 {
@@ -96,12 +115,12 @@ int getword(char *word, int lim)
     while (isspace(c = getch()));
     if (c != EOF)
         *w++ = c;
-    if (!isalpha(c)) {
+    if (!is_word_char(c)) {
         *w = '\0';
         return c;
     }
     for (; --lim > 0; w++)
-        if (!isalnum(*w = getch())) {
+        if (!is_word_char(*w = getch())) {
             ungetch(*w);
             break;
         }
