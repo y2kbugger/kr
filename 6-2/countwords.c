@@ -16,8 +16,7 @@
  *
  *   hello
  *
- *   goodbye
- *   goodbyeworld
+ *   goodbye, goodbyeworld
  *
  *   zebrafoot
  *
@@ -28,6 +27,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 
 struct WordNode {
@@ -61,6 +61,7 @@ struct WordNode testtree = {
 
 /* Command Line Settings */
 int TEST = 0;
+int GROUPLEN = 3;
 
 /* on by default for now, until we add arg handling */
 int main()
@@ -88,10 +89,16 @@ int main()
 
 void print_words(struct WordNode *rootnode)
 {
+    static char *lastword = "";
     if (rootnode->left != NULL)
         print_words(rootnode->left);
-    if (rootnode->word != NULL)
-        printf("%s\n", rootnode->word);
+    if (rootnode->word != NULL) {
+        if (strncmp(lastword, rootnode->word, GROUPLEN))
+            printf("\n%s", rootnode->word);
+        else
+            printf(", %s", rootnode->word);
+        lastword = rootnode->word;
+    }
     if (rootnode->right != NULL)
         print_words(rootnode->right);
 }
@@ -129,14 +136,39 @@ char *get_word()
 
     }
     *w = '\0';
-
     /* end of file, no word */
     if (word == w)
         return NULL;
     return word;
 }
 
-void insert_word(char *word, struct WordNode *treeroot)
+void insert_word(char *word, struct WordNode *tree)
 {
-    printf("*%s*", word);
+    /* initialize root if empty */
+    if (tree->word == NULL) {
+        tree->word = word;
+        return;
+    }
+
+    int lr = strcmp(word, tree->word);
+    if (lr == 0) {
+        /* already in tree */
+        return;
+    }
+
+    struct WordNode **lrnode;
+    if (lr < 0) {
+        lrnode = &(tree->left);
+    } else if (lr > 0) {
+        lrnode = &(tree->right);
+    }
+    if (*lrnode == NULL) {
+        *lrnode = malloc(sizeof(struct WordNode));
+        **lrnode = (struct WordNode) { word, NULL, NULL };
+    } else {
+        insert_word(word, *lrnode);
+    }
 }
+
+/* Zebra */
+/* Apple */
