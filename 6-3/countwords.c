@@ -22,6 +22,7 @@
  */
 
 #define MAXWORDLEN 100
+#define MAXLINESLEN 3
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -32,6 +33,7 @@ struct WordNode {
     char *word;
     struct WordNode *left;
     struct WordNode *right;
+    int *linenos;
 };
 
 char *get_word();
@@ -59,7 +61,9 @@ struct WordNode testtree = {
 
 /* Command Line Settings */
 int TEST = 0;
-int GROUPLEN = 3;
+
+/* Global values */
+int lineno = 1;
 
 /* on by default for now, until we add arg handling */
 int main()
@@ -87,15 +91,22 @@ int main()
 
 void print_words(struct WordNode *rootnode)
 {
-    static char *lastword = "";
+    static int *linenos = NULL;
     if (rootnode->left != NULL)
         print_words(rootnode->left);
     if (rootnode->word != NULL) {
-        if (strncmp(lastword, rootnode->word, GROUPLEN))
-            printf("\n%s", rootnode->word);
-        else
-            printf(", %s", rootnode->word);
-        lastword = rootnode->word;
+        printf("%s: ", rootnode->word);
+        linenos = (int *) rootnode->linenos;
+
+        while (*linenos != 0) {
+            /* will always rely on there being an extra zero */
+            if (*(linenos + 1) != 0)
+                printf("%d, ", *linenos);
+            else
+                printf("%d", *linenos);
+            linenos++;
+        }
+        putchar('\n');
     }
     if (rootnode->right != NULL)
         print_words(rootnode->right);
@@ -119,6 +130,8 @@ char *get_word()
     char *w = word;
     int charsleft = MAXWORDLEN;
     while ((c = getchar()) != EOF) {
+        if (c == '\n')
+            lineno++;
         if (keep_char(c)) {
             *w++ = c;
             charsleft--;
@@ -142,17 +155,36 @@ char *get_word()
 
 void insert_word(char *word, struct WordNode *tree)
 {
+    int *linenos;
     /* initialize root if empty */
     if (tree->word == NULL) {
         tree->word = word;
+        linenos = malloc(sizeof(int[MAXLINESLEN + 1])); /* extra byte for termination */
+        linenos[0] = lineno;
+        tree->linenos = linenos;
         return;
     }
 
     int lr = strcmp(word, tree->word);
     if (lr == 0) {
         /* already in tree */
+
+        /* Add new line number so skip already used (sorry n^2)
+         * leave extra zero for termination */
+        int l;
+        for (l = 0; tree->linenos[l] != 0 && l < MAXLINESLEN; l++) {
+        }
+        if (l == MAXLINESLEN)
+            printf
+                ("Number of line number on a %s exceeded max value of %d.\n",
+                 tree->word, MAXLINESLEN);
+        else
+            tree->linenos[l] = lineno;
         return;
     }
+
+    linenos = malloc(sizeof(int[MAXLINESLEN]));
+    linenos[0] = lineno;
 
     struct WordNode **lrnode;
     if (lr < 0) {
@@ -162,7 +194,8 @@ void insert_word(char *word, struct WordNode *tree)
     }
     if (*lrnode == NULL) {
         *lrnode = malloc(sizeof(struct WordNode));
-        **lrnode = (struct WordNode) { word, NULL, NULL };
+
+        **lrnode = (struct WordNode) { word, NULL, NULL, linenos };
     } else {
         insert_word(word, *lrnode);
     }
@@ -170,3 +203,11 @@ void insert_word(char *word, struct WordNode *tree)
 
 /* Zebra */
 /* Apple */
+/* zebra */
+/* zebra */
+/* zebra */
+/* zebra */
+/* zebra */
+/* zebra */
+/* zebra */
+/* zebra */
