@@ -22,17 +22,10 @@
  *   zebrafoot
  *
  *
- * Example of how it could be stored as tree:
- *
- *        goodbye
- *       /      \
- *   hello     goodbyeworld
- *                   \
- *                   zebrafoot
  */
 
 #include <stdlib.h>
-
+#include <stdio.h>
 
 struct WordNode {
     char *word;
@@ -42,27 +35,29 @@ struct WordNode {
 
 void print_words(struct WordNode *rootnode);
 
-/* Data for testing the printing program */
+/* Data for testing the printing program
+ * Example of how it could be stored as tree:
+ *
+ *        goodbye
+ *       /      \
+ *   hello     goodbyeworld
+ *                   \
+ *                   zebrafoot
+ */
 
 struct WordNode testtree = {
     "goodbye",
-    NULL,
-    NULL
+    &(struct WordNode) { "hello", NULL, NULL },
+    &(struct WordNode) { "goodbyeworld",
+                        NULL,
+                        &(struct WordNode) { "zebrafoot", NULL, NULL}
+                         }
 };
-
-/* struct WordNode { "hello", */
-    /*                  0, */
-    /*                  0 }; */
-    /* , struct WordNode { */
-    /*     "goodbyeworld", 0, struct WordNode { */
-    /*     "zebrafoot", 0, 0}; */
-    /* }; */
 
 /* Command Line Settings */
 int TEST = 1;
 
 /* on by default for now, until we add arg handling */
-
 int main()
 {
     /* parse args */
@@ -84,7 +79,11 @@ int main()
 
 void print_words(struct WordNode *rootnode)
 {
-    ;
+    if (rootnode->left != NULL)
+        print_words(rootnode->left);
+    printf("%s\n", rootnode->word);
+    if (rootnode->right != NULL)
+        print_words(rootnode->right);
 }
 
 char *get_word()
