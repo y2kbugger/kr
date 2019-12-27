@@ -24,8 +24,11 @@
  *
  */
 
+#define MAXWORDLEN 100
+
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 
 struct WordNode {
     char *word;
@@ -33,6 +36,7 @@ struct WordNode {
     struct WordNode *right;
 };
 
+char *get_word();
 void print_words(struct WordNode *rootnode);
 
 /* Data for testing the printing program
@@ -70,8 +74,12 @@ int main()
     /* search tree for word, if not existing, store the word */
     /* otherwise free the memory */
 
+    char *word;
+    while ((word = get_word()) != NULL)
+        printf("*%s*", word);
 
     /* print out the "variable names" in groups */
+    printf("\n\nVariable names:\n");
     if (TEST)
         print_words(&testtree);
     exit(0);
@@ -86,9 +94,39 @@ void print_words(struct WordNode *rootnode)
         print_words(rootnode->right);
 }
 
+int keep_char(char c)
+{
+    if (isalpha(c))
+        return 1;
+    else
+        return 0;
+}
+
 char *get_word()
 {
-    char *word;
-    word = "placeholder";
+    char c;
+    char *word = malloc(MAXWORDLEN + 1);
+    char *w = word;
+    int charsleft = MAXWORDLEN;
+    while ((c = getchar()) != EOF) {
+        if (keep_char(c)) {
+            *w++ = c;
+            charsleft--;
+        } else if (w > word) {
+            /* finished with current word */
+            break;
+            /* else no word has been started yet */
+        }
+        if (!charsleft) {
+            printf("Word exceeded MAXWORDLEN");
+            break;
+        }
+
+    }
+    *w = '\0';
+
+    /* end of file, no word */
+    if (word == w)
+        return NULL;
     return word;
 }
