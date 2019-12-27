@@ -37,6 +37,7 @@ struct WordNode {
 };
 
 char *get_word();
+void insert_word(char *word, struct WordNode *treeroot);
 void print_words(struct WordNode *rootnode);
 
 /* Data for testing the printing program
@@ -59,7 +60,7 @@ struct WordNode testtree = {
 };
 
 /* Command Line Settings */
-int TEST = 1;
+int TEST = 0;
 
 /* on by default for now, until we add arg handling */
 int main()
@@ -70,18 +71,18 @@ int main()
 
     /* read in words from stdin */
     /* get pointer one word at a time, stored in dynamically allocated memory */
-    /* should only return words that are "variable names" (how to detect by context?) */
-    /* search tree for word, if not existing, store the word */
-    /* otherwise free the memory */
 
+    struct WordNode tree = { NULL, NULL, NULL };
     char *word;
     while ((word = get_word()) != NULL)
-        printf("*%s*", word);
+        insert_word(word, &tree);
 
     /* print out the "variable names" in groups */
     printf("\n\nVariable names:\n");
     if (TEST)
         print_words(&testtree);
+    else
+        print_words(&tree);
     exit(0);
 }
 
@@ -89,7 +90,8 @@ void print_words(struct WordNode *rootnode)
 {
     if (rootnode->left != NULL)
         print_words(rootnode->left);
-    printf("%s\n", rootnode->word);
+    if (rootnode->word != NULL)
+        printf("%s\n", rootnode->word);
     if (rootnode->right != NULL)
         print_words(rootnode->right);
 }
@@ -102,6 +104,9 @@ int keep_char(char c)
         return 0;
 }
 
+/* should only return words that are "variable names" (how to detect by context?) */
+/* search tree for word, if not existing, store the word */
+/* otherwise free the memory */
 char *get_word()
 {
     char c;
@@ -129,4 +134,9 @@ char *get_word()
     if (word == w)
         return NULL;
     return word;
+}
+
+void insert_word(char *word, struct WordNode *treeroot)
+{
+    printf("*%s*", word);
 }
