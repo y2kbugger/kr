@@ -11,10 +11,11 @@ struct nlist {                  /* table entry: */
 #include <string.h>
 #include <stdio.h>
 
-#define HASHSIZE 101
+#define HASHSIZE 1              /* Set to 1 to force collision to test undef reconnecting linked list */
 static struct nlist *hashtab[HASHSIZE]; /* pointer table */
 struct nlist *install(char *name, char *defn);
 struct nlist *lookup(char *);
+void undef(char *name);
 char *mystrdup(char *);
 void lookup_and_print(char *name);
 
@@ -22,10 +23,25 @@ int main()
 {
     install("Hello", "Helllllllo");
     install("Goodbye", "weidersehen");
+    install("Good", "Friends");
+    install("Happy", "Life");
+    install("Happy", "Wife");
+    install("Spotted", "Dick");
 
     lookup_and_print("Hello");
     lookup_and_print("Hello");
     lookup_and_print("Hell");
+    lookup_and_print("Goodbyee");
+    lookup_and_print("Goodbye");
+    undef("Hello");
+    lookup_and_print("Hello");
+    install("Hello", "Helllllllo");
+    lookup_and_print("Hello");
+    install("Hello", "Whats up???");
+    lookup_and_print("Hello");
+    undef("Hello");
+    lookup_and_print("Hello");
+    lookup_and_print("Spotted");
     return 0;
 }
 
@@ -36,7 +52,7 @@ void lookup_and_print(char *name)
     if (nlist != NULL)
         printf("`%s` ==> `%s`\n", name, nlist->defn);
     else
-        printf("`%s` Not Found", name);
+        printf("`%s` Not Found\n", name);
 
 }
 
@@ -68,19 +84,15 @@ void undef(char *name)
     unsigned hashval;
 
     if ((np = lookup(name)) == NULL) {  /* not found */
-        np = (struct nlist *) malloc(sizeof(*np));
-        if (np == NULL || (np->name = strdup(name)) == NULL)
-            return NULL;
+        printf("Could not undef `%s` not found\n", name);
+    } else {                    /* already there */
         hashval = hash(name);
-        np->next = hashtab[hashval];
-        hashtab[hashval] = np;
-    } else                      /* already there */
+        hashtab[hashval] = np->next;
         free((void *) np->defn);        /* free previous defn */
-    if ((np->defn = strdup(defn)) == NULL)
-        return NULL;
+        free((void *) np);      /* free previous np */
+    }
 
-    printf("Installed `%s` ==> `%s`\n", name, defn);
-    return np;
+    printf("Removed `%s`\n", name);
 }
 
 /* install:  put (name, defn) in hashtab */
