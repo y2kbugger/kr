@@ -40,7 +40,8 @@ char *get_word();
 void insert_word(char *word, struct WordNode *tree);
 struct WordNode **linearize_tree(struct WordNode *tree);
 void print_words_array(struct WordNode **node);
-int count_occurances(struct WordNode *node);
+int count_occurances(const struct WordNode *node);
+int compare_occurancecount(const void *a, const void *b);
 
 /* Data for testing the printing program
  * Example of how it could be stored as tree:
@@ -92,10 +93,31 @@ int main()
     else
         nodes = linearize_tree(&tree);
 
+    printf("\n\nnodecount:%d\n", nodecount);
+    fflush(stdout);
     printf("\n\nWords:\n");
+    qsort(nodes, nodecount, sizeof(nodes[0]), compare_occurancecount);
     print_words_array(nodes);
 
     exit(0);
+}
+
+int compare_occurancecount(const void *a, const void *b)
+{
+    int count_a = count_occurances(*(const struct WordNode **) a);
+    int count_b = count_occurances(*(const struct WordNode **) b);
+
+    printf("%d==", count_a);
+    printf("%d\n", count_b);
+    fflush(stdout);
+
+    if (count_a < count_b)
+        return -1;
+    else if (count_a > count_b)
+        return 1;
+    else
+        return 0;
+
 }
 
 void print_word(struct WordNode *node)
@@ -113,10 +135,13 @@ void print_words_array(struct WordNode **nodes)
 
 /* Count the linenos to know how many times each word occurs */
 /* Of course this could have been tracked in stuct, possible optimization */
-int count_occurances(struct WordNode *node)
+int count_occurances(const struct WordNode *node)
 {
     int count = 0;
     int *linenos = (int *) node->linenos;
+
+    if (linenos == NULL)
+        return 0;
 
     while (*linenos != 0) {
         /* will always rely on there being an extra zero */
