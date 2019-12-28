@@ -20,61 +20,65 @@ struct nlist *lookup(char *);
 void undef(char *name);
 char *mystrdup(char *);
 void lookup_and_print(char *name);
+int check_preprocessor_line(char *line);
 void install_definition();
 
 int main()
 {
-    char c;
-    char *definekw = "#define";
-
-    /* NULL when not looking for define */
-    /* starting looking at beginning of file and after newlines */
-    char *definekw_ptr = definekw;
-
-    while ((c = getc(stdin)) != EOF) {
-        if (definekw_ptr != NULL && *definekw_ptr == '\0') {
-            install_definition();
-            definekw_ptr = NULL;
-            continue;
+    char *line = "";
+    size_t linelen = 0;
+    while (getline(&line, &linelen, stdin) > 0) {
+        if (!check_preprocessor_line(line)) {
+            printf("%s", line);
         }
-        if (definekw_ptr != NULL && *definekw_ptr == c)
-            definekw_ptr++;
-        else
-            definekw_ptr = NULL;
-        if (definekw_ptr == NULL)
-            putc(c, stdout);
-        if (c == '\n')
-            definekw_ptr = definekw;
     }
 }
 
-void install_definition()
+int check_preprocessor_line(char *line)
 {
-    char c;
-    while ((c = getc(stdin)) != EOF && isspace(c));
-    ungetc(c, stdin);
+    char *definekw = "#define";
+    char *definekw_ptr = definekw;
 
-    char *name = malloc(sizeof(name[0]) * 100);
+    for (char *l = line; *l != '\n'; l++) {
+        if (*definekw_ptr == '\0') {
+            install_definition(l);
+            return 1;
+        } else if (*definekw_ptr == *l) {
+            /* keep going if we are matching the word we are looking for */
+            definekw_ptr++;
+        } else
+            /* not actually a define */
+            break;
+    }
+    return 0;
+}
+
+#define DEFARGS_NAME_SIZE 100
+void install_definition(char *defn_args)
+{
+    while (isspace(*defn_args) && (*defn_args != '\n'))
+        defn_args++;
+
+    char *name = malloc(sizeof(name[0]) * DEFARGS_NAME_SIZE);
     char *n = name;
-    while ((c = getc(stdin)) != EOF && !isspace(c))
-        *n++ = c;
-    ungetc(c, stdin);
+    while (!isspace(*defn_args) && (*defn_args != '\n'))
+        *n++ = *defn_args++;
+    *n = '\0';
 
-    while ((c = getc(stdin)) != EOF && isspace(c));
-    ungetc(c, stdin);
+    while (isspace(*defn_args) && (*defn_args != '\n'))
+        defn_args++;
 
-    char *defn = malloc(sizeof(defn[0]) * 100);
+    char *defn = malloc(sizeof(defn[0]) * DEFARGS_NAME_SIZE);
     char *d = defn;
-    while ((c = getc(stdin)) != EOF && !isspace(c))
-        *d++ = c;
-    ungetc(c, stdin);
+    while (!isspace(*defn_args) && (*defn_args != '\n'))
+        *d++ = *defn_args++;
+    *d = '\0';
 
     /* ignore the rest of the line */
-    while ((c = getc(stdin)) != EOF && c != '\n');
-    putc('\n', stdout);
+    while (*defn_args != '\n')
+        defn_args++;
 
-    if (c != EOF)
-        install(name, defn);
+    install(name, defn);
     free((void *) name);
     free((void *) defn);
 }
@@ -160,3 +164,31 @@ char *mystrdup(char *s)
         strcpy(p, s);
     return p;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* d */
+/* d */
+/* d */
+/* d */
+/* d */
