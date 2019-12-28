@@ -11,6 +11,7 @@ struct nlist {                  /* table entry: */
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #define HASHSIZE 101
 static struct nlist *hashtab[HASHSIZE]; /* pointer table */
@@ -19,12 +20,63 @@ struct nlist *lookup(char *);
 void undef(char *name);
 char *mystrdup(char *);
 void lookup_and_print(char *name);
+void install_definition();
 
 int main()
 {
     char c;
-    while ((c = getc(stdin)) != EOF)
-        putc(c, stdout);
+    char *definekw = "#define";
+
+    /* NULL when not looking for define */
+    /* starting looking at beginning of file and after newlines */
+    char *definekw_ptr = definekw;
+
+    while ((c = getc(stdin)) != EOF) {
+        if (definekw_ptr != NULL && *definekw_ptr == '\0') {
+            install_definition();
+            definekw_ptr = NULL;
+            continue;
+        }
+        if (definekw_ptr != NULL && *definekw_ptr == c)
+            definekw_ptr++;
+        else
+            definekw_ptr = NULL;
+        if (definekw_ptr == NULL)
+            putc(c, stdout);
+        if (c == '\n')
+            definekw_ptr = definekw;
+    }
+}
+
+void install_definition()
+{
+    char c;
+    while ((c = getc(stdin)) != EOF && isspace(c));
+    ungetc(c, stdin);
+
+    char *name = malloc(sizeof(name[0]) * 100);
+    char *n = name;
+    while ((c = getc(stdin)) != EOF && !isspace(c))
+        *n++ = c;
+    ungetc(c, stdin);
+
+    while ((c = getc(stdin)) != EOF && isspace(c));
+    ungetc(c, stdin);
+
+    char *defn = malloc(sizeof(defn[0]) * 100);
+    char *d = defn;
+    while ((c = getc(stdin)) != EOF && !isspace(c))
+        *d++ = c;
+    ungetc(c, stdin);
+
+    /* ignore the rest of the line */
+    while ((c = getc(stdin)) != EOF && c != '\n');
+    putc('\n', stdout);
+
+    if (c != EOF)
+        install(name, defn);
+    free((void *) name);
+    free((void *) defn);
 }
 
 void lookup_and_print(char *name)
