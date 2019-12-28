@@ -12,7 +12,7 @@ struct nlist {                  /* table entry: */
 #include <string.h>
 #include <stdio.h>
 
-#define HASHSIZE 1              /* Set to 1 to force collision to test undef reconnecting linked list */
+#define HASHSIZE 101
 static struct nlist *hashtab[HASHSIZE]; /* pointer table */
 struct nlist *install(char *name, char *defn);
 struct nlist *lookup(char *);
@@ -22,28 +22,9 @@ void lookup_and_print(char *name);
 
 int main()
 {
-    install("Hello", "Helllllllo");
-    install("Goodbye", "weidersehen");
-    install("Good", "Friends");
-    install("Happy", "Life");
-    install("Happy", "Wife");
-    install("Spotted", "Dick");
-
-    lookup_and_print("Hello");
-    lookup_and_print("Hello");
-    lookup_and_print("Hell");
-    lookup_and_print("Goodbyee");
-    lookup_and_print("Goodbye");
-    undef("Hello");
-    lookup_and_print("Hello");
-    install("Hello", "Helllllllo");
-    lookup_and_print("Hello");
-    install("Hello", "Whats up???");
-    lookup_and_print("Hello");
-    undef("Hello");
-    lookup_and_print("Hello");
-    lookup_and_print("Spotted");
-    return 0;
+    char c;
+    while ((c = getc(stdin)) != EOF)
+        putc(c, stdout);
 }
 
 void lookup_and_print(char *name)
