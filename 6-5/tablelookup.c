@@ -9,15 +9,35 @@ struct nlist {                  /* table entry: */
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #define HASHSIZE 101
 static struct nlist *hashtab[HASHSIZE]; /* pointer table */
+struct nlist *install(char *name, char *defn);
 struct nlist *lookup(char *);
 char *mystrdup(char *);
+void lookup_and_print(char *name);
 
 int main()
 {
+    install("Hello", "Helllllllo");
+    install("Goodbye", "weidersehen");
+
+    lookup_and_print("Hello");
+    lookup_and_print("Hello");
+    lookup_and_print("Hell");
     return 0;
+}
+
+void lookup_and_print(char *name)
+{
+    struct nlist *nlist;
+    nlist = lookup(name);
+    if (nlist != NULL)
+        printf("`%s` ==> `%s`\n", name, nlist->defn);
+    else
+        printf("`%s` Not Found", name);
+
 }
 
 /* hash:  form hash value for string s */
@@ -58,6 +78,8 @@ struct nlist *install(char *name, char *defn)
         free((void *) np->defn);        /* free previous defn */
     if ((np->defn = strdup(defn)) == NULL)
         return NULL;
+
+    printf("Installed `%s` ==> `%s`\n", name, defn);
     return np;
 }
 
