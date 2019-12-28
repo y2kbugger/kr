@@ -89,27 +89,33 @@ int main()
     exit(0);
 }
 
-void print_words(struct WordNode *rootnode)
+void print_word(struct WordNode *node)
 {
-    static int *linenos = NULL;
-    if (rootnode->left != NULL)
-        print_words(rootnode->left);
-    if (rootnode->word != NULL) {
-        printf("%s: ", rootnode->word);
-        linenos = (int *) rootnode->linenos;
+    int *linenos = NULL;
+    printf("%s: ", node->word);
+    linenos = (int *) node->linenos;
 
-        while (*linenos != 0) {
-            /* will always rely on there being an extra zero */
-            if (*(linenos + 1) != 0)
-                printf("%d, ", *linenos);
-            else
-                printf("%d", *linenos);
-            linenos++;
-        }
-        putchar('\n');
+    while (*linenos != 0) {
+        /* will always rely on there being an extra zero */
+        if (*(linenos + 1) != 0)
+            printf("%d, ", *linenos);
+        else
+            printf("%d", *linenos);
+        linenos++;
     }
-    if (rootnode->right != NULL)
-        print_words(rootnode->right);
+    putchar('\n');
+
+}
+
+void print_words(struct WordNode *tree)
+{
+    if (tree->left != NULL)
+        print_words(tree->left);
+    if (tree->word != NULL) {
+        print_word(tree);
+    }
+    if (tree->right != NULL)
+        print_words(tree->right);
 }
 
 int keep_char(char c)
