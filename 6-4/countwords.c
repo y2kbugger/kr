@@ -22,7 +22,7 @@
  */
 
 #define MAXWORDLEN 100
-#define MAXLINESLEN 3
+#define MAXLINESLEN 100
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,8 +37,9 @@ struct WordNode {
 };
 
 char *get_word();
-void insert_word(char *word, struct WordNode *treeroot);
-void print_words(struct WordNode *rootnode);
+void insert_word(char *word, struct WordNode *tree);
+void print_words(struct WordNode *tree);
+int count_occurances(struct WordNode *node);
 
 /* Data for testing the printing program
  * Example of how it could be stored as tree:
@@ -91,9 +92,12 @@ int main()
 
 void print_word(struct WordNode *node)
 {
+    printf("%d: ", count_occurances(node));
+
     int *linenos = NULL;
     printf("%s: ", node->word);
     linenos = (int *) node->linenos;
+
 
     while (*linenos != 0) {
         /* will always rely on there being an extra zero */
@@ -105,6 +109,21 @@ void print_word(struct WordNode *node)
     }
     putchar('\n');
 
+}
+
+/* Count the linenos to know how many times each word occurs */
+/* Of course this could have been tracked in stuct, possible optimization */
+int count_occurances(struct WordNode *node)
+{
+    int count = 0;
+    int *linenos = (int *) node->linenos;
+
+    while (*linenos != 0) {
+        /* will always rely on there being an extra zero */
+        linenos++;
+        count++;
+    }
+    return count;
 }
 
 void print_words(struct WordNode *tree)
