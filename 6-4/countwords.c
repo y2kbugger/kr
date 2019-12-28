@@ -38,7 +38,8 @@ struct WordNode {
 
 char *get_word();
 void insert_word(char *word, struct WordNode *tree);
-void print_words(struct WordNode *tree);
+struct WordNode **linearize_tree(struct WordNode *tree);
+void print_words_array(struct WordNode **node);
 int count_occurances(struct WordNode *node);
 
 /* Data for testing the printing program
@@ -65,6 +66,7 @@ int TEST = 0;
 
 /* Global values */
 int lineno = 1;
+int nodecount = 0;
 
 /* on by default for now, until we add arg handling */
 int main()
@@ -78,37 +80,35 @@ int main()
 
     struct WordNode tree = { NULL, NULL, NULL };
     char *word;
-    while ((word = get_word()) != NULL)
+    while ((word = get_word()) != NULL) {
         insert_word(word, &tree);
+    }
 
     /* print out the "variable names" in groups */
-    printf("\n\nVariable names:\n");
+
+    struct WordNode **nodes = NULL;
     if (TEST)
-        print_words(&testtree);
+        nodes = linearize_tree(&testtree);
     else
-        print_words(&tree);
+        nodes = linearize_tree(&tree);
+
+    printf("\n\nWords:\n");
+    print_words_array(nodes);
+
     exit(0);
 }
 
 void print_word(struct WordNode *node)
 {
-    printf("%d: ", count_occurances(node));
-
-    int *linenos = NULL;
-    printf("%s: ", node->word);
-    linenos = (int *) node->linenos;
-
-
-    while (*linenos != 0) {
-        /* will always rely on there being an extra zero */
-        if (*(linenos + 1) != 0)
-            printf("%d, ", *linenos);
-        else
-            printf("%d", *linenos);
-        linenos++;
-    }
+    printf("%3d: ", count_occurances(node));
+    printf("%s", node->word);
     putchar('\n');
+}
 
+void print_words_array(struct WordNode **nodes)
+{
+    for (int i = 0; nodes[i]; i++)
+        print_word(nodes[i]);
 }
 
 /* Count the linenos to know how many times each word occurs */
@@ -126,15 +126,23 @@ int count_occurances(struct WordNode *node)
     return count;
 }
 
-void print_words(struct WordNode *tree)
+struct WordNode **linearize_tree(struct WordNode *tree)
 {
-    if (tree->left != NULL)
-        print_words(tree->left);
-    if (tree->word != NULL) {
-        print_word(tree);
+    static struct WordNode **nodes = NULL;
+    static struct WordNode **nodes_append = NULL;
+    if (nodes == NULL) {
+        nodes_append = nodes = malloc(sizeof(nodes[0]) * nodecount);
     }
+
+    /* get into a linear arrary */
+    if (tree->left != NULL)
+        linearize_tree(tree->left);
+    if (tree->word != NULL)
+        *nodes_append++ = tree;
     if (tree->right != NULL)
-        print_words(tree->right);
+        linearize_tree(tree->right);
+
+    return nodes;
 }
 
 int keep_char(char c)
@@ -183,6 +191,7 @@ void insert_word(char *word, struct WordNode *tree)
     int *linenos;
     /* initialize root if empty */
     if (tree->word == NULL) {
+        nodecount++;
         tree->word = word;
         linenos = malloc(sizeof(int[MAXLINESLEN + 1])); /* extra byte for termination */
         linenos[0] = lineno;
@@ -210,7 +219,6 @@ void insert_word(char *word, struct WordNode *tree)
 
     linenos = malloc(sizeof(int[MAXLINESLEN]));
     linenos[0] = lineno;
-
     struct WordNode **lrnode;
     if (lr < 0) {
         lrnode = &(tree->left);
@@ -219,8 +227,8 @@ void insert_word(char *word, struct WordNode *tree)
     }
     if (*lrnode == NULL) {
         *lrnode = malloc(sizeof(struct WordNode));
-
         **lrnode = (struct WordNode) { word, NULL, NULL, linenos };
+        nodecount++;
     } else {
         insert_word(word, *lrnode);
     }
