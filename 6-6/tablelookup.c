@@ -20,7 +20,8 @@ struct nlist *lookup(char *);
 void undef(char *name);
 char *mystrdup(char *);
 void lookup_and_print(char *name);
-int check_preprocessor_line(char *line);
+int check_line_for_preprocessor(char *line);
+int check_line_for_define_replacement(char *line);
 void install_definition();
 
 int main()
@@ -34,11 +35,12 @@ int main()
     }
 }
 
-int check_preprocessor_line(char *line)
+int check_line_for_preprocessor(char *line)
 {
     char *definekw = "#define";
     char *definekw_ptr = definekw;
 
+    /* rewrite with strncmp */
     for (char *l = line; *l != '\n'; l++) {
         if (*definekw_ptr == '\0') {
             install_definition(l);
@@ -51,6 +53,14 @@ int check_preprocessor_line(char *line)
             break;
     }
     return 0;
+}
+
+int check_line_for_define_replacement(char *line)
+{
+    char *l = line;
+    while (isalnum(c)) {
+        /* break up into words and perform lookups */
+    }
 }
 
 #define DEFARGS_NAME_SIZE 100
