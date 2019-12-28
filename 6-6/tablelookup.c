@@ -147,7 +147,7 @@ struct nlist *install(char *name, char *defn)
     if ((np->defn = strdup(defn)) == NULL)
         return NULL;
 
-    printf("Installed `%s` ==> `%s`\n", name, defn);
+    printf("/* Installed `%s` ==> `%s` */\n", name, defn);
     return np;
 }
 
