@@ -20,8 +20,9 @@ struct nlist *lookup(char *);
 void undef(char *name);
 char *mystrdup(char *);
 void lookup_and_print(char *name);
+void lookup_and_print_defn_or_else_name(char *name);
 int check_line_for_preprocessor(char *line);
-int check_line_for_define_replacement(char *line);
+void print_line_with_replacements(char *line);
 void install_definition();
 
 int main()
@@ -29,9 +30,8 @@ int main()
     char *line = "";
     size_t linelen = 0;
     while (getline(&line, &linelen, stdin) > 0) {
-        if (!check_preprocessor_line(line)) {
-            printf("%s", line);
-        }
+        if (!check_line_for_preprocessor(line))
+            print_line_with_replacements(line);
     }
 }
 
@@ -55,15 +55,26 @@ int check_line_for_preprocessor(char *line)
     return 0;
 }
 
-int check_line_for_define_replacement(char *line)
+#define DEFARGS_NAME_SIZE 100
+void print_line_with_replacements(char *line)
 {
+    char word[DEFARGS_NAME_SIZE] = "";
+    char *w = word;
     char *l = line;
-    while (isalnum(c)) {
-        /* break up into words and perform lookups */
+    /* break up into words and perform lookups */
+    while (*l != '\n') {
+        w = word;
+        while (isalnum(*l) || *l == '_')
+            *w++ = *l++;
+        *w = '\0';
+        if (w != word) {        /* word found */
+            lookup_and_print_defn_or_else_name(word);
+        }
+        putchar(*l++);
     }
+    putchar('\n');
 }
 
-#define DEFARGS_NAME_SIZE 100
 void install_definition(char *defn_args)
 {
     while (isspace(*defn_args) && (*defn_args != '\n'))
@@ -91,6 +102,17 @@ void install_definition(char *defn_args)
     install(name, defn);
     free((void *) name);
     free((void *) defn);
+}
+
+void lookup_and_print_defn_or_else_name(char *name)
+{
+    struct nlist *nlist;
+    nlist = lookup(name);
+    if (nlist != NULL)
+        printf("%s", nlist->defn);
+    else
+        printf("%s", name);
+
 }
 
 void lookup_and_print(char *name)
