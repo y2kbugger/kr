@@ -11,26 +11,18 @@ void lower();
 
 int main(int argc, char **argv)
 {
+    int (*casechange)(int d);
+
     /* could be slightly more general detecting argv[0] */
     if (strcmp(*argv, "./upper") == 0)
-        upper();
+        casechange = &toupper;
     else if (strcmp(*argv, "./lower") == 0)
-        lower();
+        casechange = &tolower;
     else
         printf("%s",
                "executable name should be either './upper' or './lower'\n");
-}
 
-void upper()
-{
-    char c;
+    int c;
     while ((c = getchar()) != EOF)
-        putchar(toupper(c));
-}
-
-void lower()
-{
-    char c;
-    while ((c = getchar()) != EOF)
-        putchar(tolower(c));
+        putchar(casechange(c));
 }
