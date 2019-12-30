@@ -1,3 +1,9 @@
+/* Exercise 8-2. Rewrite fopen and _fillbuf with fields instead of explicit bit
+ * operations. 
+ *
+ * So we have the file opening and reading correctly, but I have to use GDB to confirm that because I don't have _flushbuf...yet
+ * */
+
 
 #include <stdlib.h>
 /* #include <stdio.h> */
@@ -46,13 +52,12 @@ int _flushbuf(int, FILE *);
 #define    ferror(p)   (((p)->flag &_ERR) != 0)
 #define    fileno(p)   ((p)->fd)
 
-#define getc(p)   (--(p)->cnt >= 0 \
-               ? (unsigned char) *(p)->ptr++ : _fillbuf(p))
+#define getc(p)   (--(p)->cnt >= 0 ? (unsigned char) *(p)->ptr++ : _fillbuf(p))
 
-/* #define putc(x,p) (--(p)->cnt >= 0 \ */
-/*                ? *(p)->ptr++ = (x) : _flushbuf((x),p)) */
-
-#define putc(x,p) (*(p)->ptr++ = (x))
+/* we dont have flush buffer yet */
+/* #define putc(x,p) (--(p)->cnt >= 0 ? *(p)->ptr++ = (x) : _flushbuf((x),p)) */
+#define putc(x,p) (--(p)->cnt >= 0 ? *(p)->ptr++ = (x) : (*(p)->ptr++ = (x)))
+#define putc(x,p) (--((&_iob[1]))->cnt >= 0 ? (*((&_iob[1]))->ptr++ = ('x')) : (*((&_iob[1]))->ptr++ = ('x')))
 
 #define getchar()   getc(stdin)
 #define putchar(x)  putc((x), stdout)
@@ -70,15 +75,42 @@ int main(int argc, char *argv[])
 {
     FILE *fp;
     char mymode = 'r';
-    if (argc == 1)
-        fp = myfopen(*argv++, &mymode);
+    if (argc == 2)
+        fp = myfopen(argv[1], &mymode);
     else {
         exit(3);
     }
 
-    for (int n = 10; n > 0; n--)
-        putchar(getc(fp));
+    char c;
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
+    c = getc(fp);
 }
+
 
 /* fopen:  open file, return file ptr */
 FILE *myfopen(char *name, char *mode)
