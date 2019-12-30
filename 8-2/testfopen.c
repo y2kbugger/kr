@@ -60,9 +60,9 @@ int _flushbuf(int, FILE *);
 #define putchar(x)  putc((x), stdout)
 
 FILE _iob[OPEN_MAX] = {         /* stdin, stdout, stderr: */
-    { 0, (char *) 0, (char *) 0, _READ, 0 },
-    { 0, (char *) 0, (char *) 0, _WRITE, 1 },
-    { 0, (char *) 0, (char *) 0, _WRITE | _UNBUF, 2 }
+    { 0, (char *) 0, (char *) 0, {._READ = 1}, 0 },
+    { 0, (char *) 0, (char *) 0, {._WRITE = 1}, 1 },
+    { 0, (char *) 0, (char *) 0, {._WRITE = 1,._UNBUF = 1}, 2 }
 };
 
 FILE *myfopen(char *name, char *mode);
@@ -83,29 +83,7 @@ int main(int argc, char *argv[])
     c = getc(fp);
     c = getc(fp);
     c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
+    exit((int) c);
 }
 
 
@@ -118,7 +96,7 @@ FILE *myfopen(char *name, char *mode)
     if (*mode != 'r' && *mode != 'w' && *mode != 'a')
         return NULL;
     for (fp = _iob; fp < _iob + OPEN_MAX; fp++)
-        if ((fp->flag & (_READ | _WRITE)) == 0)
+        if ((fp->flag._READ == 0) && (fp->flag._WRITE == 0))
             break;              /* found free slot */
     if (fp >= _iob + OPEN_MAX)  /* no free slots */
         return NULL;
@@ -137,7 +115,10 @@ FILE *myfopen(char *name, char *mode)
     fp->fd = fd;
     fp->cnt = 0;
     fp->base = NULL;
-    fp->flag = (*mode == 'r') ? _READ : _WRITE;
+    if (*mode == 'r')
+        fp->flag._READ = 1;
+    else
+        fp->flag._WRITE = 1;
     return fp;
 }
 
@@ -146,9 +127,11 @@ int _fillbuf(FILE * fp)
 {
     int bufsize;
 
-    if ((fp->flag & (_READ | _EOF | _ERR)) != _READ)
+    if ((fp->flag._READ == 1)
+        && ((fp->flag._EOF == 1) || (fp->flag._ERR == 1)))
         return EOF;
-    bufsize = (fp->flag & _UNBUF) ? 1 : BUFSIZ;
+
+    bufsize = (fp->flag._UNBUF) ? 1 : BUFSIZ;
     if (fp->base == NULL)       /* no buffer yet */
         if ((fp->base = (char *) malloc(bufsize)) == NULL)
             return EOF;         /* can't get buffer */
@@ -157,9 +140,9 @@ int _fillbuf(FILE * fp)
     if (--fp->cnt < 0) {
 
         if (fp->cnt == -1)
-            fp->flag |= _EOF;
+            fp->flag._EOF = 1;
         else
-            fp->flag |= _ERR;
+            fp->flag._ERR = 1;
         fp->cnt = 0;
         return EOF;
     }
