@@ -61,11 +61,13 @@ int calculator()
     double op1;
     double op2;
     char s[MAXOP];
+    char numberstring[MAXOP];
 
     while ((type = getop(s)) != EOF) {
         switch (type) {
         case NUMBER:
-            push(atof(s));
+            sscanf(numberstring, "%f", s);
+            push(numberstring);
             break;
         case '>':              /* Variables store */
             op1 = pop();
