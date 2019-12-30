@@ -10,7 +10,7 @@ void minscanf(char *fmt, ...);
 int main()
 {
     char c = 'z';
-    minscanf("test:`%c`", &c);
+    minscanf("test:%c", &c);
     /* scanf("test:%c", &c); */
     printf("the letter scanned was: `%c`!!!\n", c);
     exit(0);
@@ -19,22 +19,27 @@ int main()
 void minscanf(char *fmt, ...)
 {
     va_list ap;                 /* points to each unnamed arg in turn */
-    char *p, *sval;
-    int cval;
-    int ival;
-    double dval;
+    char *p;
+    /* char *sval; */
+    int *cptrval;
+    /* int ival; */
+    /* double dval; */
 
     va_start(ap, fmt);          /* make ap point to 1st unnamed arg */
     for (p = fmt; *p; p++) {
         if (*p != '%') {
-            putchar(*p);
-            continue;
+            if (*p == getchar()) {
+                continue;
+            } else {
+                printf("failed to match pattern");
+                break;
+            }
         }
         switch (*++p) {
             case
         'c':
-            cval = va_arg(ap, int);
-            printf("%c", (char) cval);
+            cptrval = va_arg(ap, int *);
+            *cptrval = getchar();
             break;
             /* case */
             /* 'd': */
