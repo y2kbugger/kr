@@ -10,6 +10,7 @@ void minprintf(char *fmt, ...);
 int main()
 {
     minprintf("phrase is `%s`\n", "Hello world");
+    minprintf("phrase is `%c`\n", 'd');
     exit(0);
 }
 
@@ -18,6 +19,7 @@ void minprintf(char *fmt, ...)
 {
     va_list ap;                 /* points to each unnamed arg in turn */
     char *p, *sval;
+    int cval;
     int ival;
     double dval;
 
@@ -28,6 +30,11 @@ void minprintf(char *fmt, ...)
             continue;
         }
         switch (*++p) {
+            case
+        'c':
+            cval = va_arg(ap, int);
+            printf("%c", (char) cval);
+            break;
             case
         'd':
             ival = va_arg(ap, int);
