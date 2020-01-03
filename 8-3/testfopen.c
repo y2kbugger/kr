@@ -145,4 +145,12 @@ int _fillbuf(FILE * fp)
     return (unsigned char) *fp->ptr++;
 }
 
+int _flushbuf(int, FILE *)
+{
+    int bufsize;
+    bufsize = (fp->flag._UNBUF) ? 1 : BUFSIZ;
+
+    return 0;
+}
+
 #define BOTTOM 1
