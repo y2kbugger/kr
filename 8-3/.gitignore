@@ -8,3 +8,4 @@ Makefile
 
 CTestTestfile.cmake
 Testing/
+.clangd/
