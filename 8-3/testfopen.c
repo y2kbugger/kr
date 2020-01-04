@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     c = getc(fp);
     c = getc(fp);
     c = getc(fp);
-    exit((int) c);
+    exit(0);
 }
 
 

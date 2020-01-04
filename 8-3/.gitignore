@@ -5,3 +5,6 @@ compile_commands.json
 CMakeFiles
 compile_commands.json
 Makefile
+
+CTestTestfile.cmake
+Testing/

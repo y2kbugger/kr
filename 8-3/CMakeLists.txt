@@ -9,3 +9,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable(testfopen testfopen.c)
 
 set_property(TARGET testfopen PROPERTY C_STANDARD 11)
+
+
+
+enable_testing()
+
+# does the application run
+add_test(NAME Runs COMMAND testfopen test.txt)
