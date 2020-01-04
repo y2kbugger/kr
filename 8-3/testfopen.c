@@ -17,7 +17,7 @@
 
 /* #define NULL      0 */
 #define EOF       (-1)
-#define BUFSIZ    1024
+#define BUFSIZ    16
 #define OPEN_MAX  20            /* max #files open at once */
 
 typedef struct _iobuf {
@@ -39,22 +39,19 @@ extern FILE _iob[OPEN_MAX];
 #define stdout  (&_iob[1])
 #define stderr  (&_iob[2])
 
-int _fillbuf(FILE *);
-int _flushbuf(int, FILE *);
+int _fillbuf(FILE * stream);
+int _flushbuf(int, FILE * stream);
+int fflush(FILE * stream);
 
 #define    feof(p)     (((p)->flag &_EOF) != 0)
 #define    ferror(p)   (((p)->flag &_ERR) != 0)
 #define    fileno(p)   ((p)->fd)
-
+/* if the count is zero read new chars to buffer */
 #define getc(p)   (--(p)->cnt >= 0 ? (unsigned char) *(p)->ptr++ : _fillbuf(p))
-
-/* we dont have flush buffer yet */
-/* #define putc(x,p) (--(p)->cnt >= 0 ? *(p)->ptr++ = (x) : _flushbuf((x),p)) */
-/* #define putc(x,p) (--(p)->cnt >= 0 ? *(p)->ptr++ = (x) : (*(p)->ptr++ = (x))) */
-
+/* if the count is zero flush the buffer and write a new char to buffer */
+#define putc(x,p) (--(p)->cnt >= 0 ? *(p)->ptr++ = (x) : _flushbuf((x),p))
 #define getchar()   getc(stdin)
 #define putchar(x)  putc((x), stdout)
-
 FILE _iob[OPEN_MAX] = {         /* stdin, stdout, stderr: */
     { 0, (char *) 0, (char *) 0, {._READ = 1}, 0 },
     { 0, (char *) 0, (char *) 0, {._WRITE = 1}, 1 },
@@ -67,21 +64,17 @@ FILE *myfopen(char *name, char *mode);
 int main(int argc, char *argv[])
 {
     FILE *fp;
-    char mymode = 'r';
     if (argc == 2)
-        fp = myfopen(argv[1], &mymode);
+        fp = myfopen(argv[1], "r");
     else {
         exit(3);
     }
 
     char c;
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    c = getc(fp);
-    exit(0);
+    while ((c = getc(fp)) != EOF)
+        putc(c, stdout);
+    fflush(NULL);
 }
-
 
 /* fopen:  open file, return file ptr */
 FILE *myfopen(char *name, char *mode)
@@ -121,12 +114,15 @@ FILE *myfopen(char *name, char *mode)
 /* _fillbuf:  allocate and fill input buffer */
 int _fillbuf(FILE * fp)
 {
-    int bufsize;
 
-    if ((fp->flag._READ == 1)
-        && ((fp->flag._EOF == 1) || (fp->flag._ERR == 1)))
+    /* must be open for read */
+    if (fp->flag._READ == 0)
         return EOF;
 
+    if ((fp->flag._EOF == 1) || (fp->flag._ERR == 1))
+        return EOF;
+
+    int bufsize;
     bufsize = (fp->flag._UNBUF) ? 1 : BUFSIZ;
     if (fp->base == NULL)       /* no buffer yet */
         if ((fp->base = (char *) malloc(bufsize)) == NULL)
@@ -145,12 +141,59 @@ int _fillbuf(FILE * fp)
     return (unsigned char) *fp->ptr++;
 }
 
-/* int _flushbuf(int, FILE *) */
-/* { */
-/*     int bufsize; */
-/*     bufsize = (fp->flag._UNBUF) ? 1 : BUFSIZ; */
+/* _flushbuf:  allocate and flush input buffer */
+int _flushbuf(int c, FILE * fp)
+{
+    /* must be open for write */
+    if (fp->flag._WRITE == 0)
+        return EOF;
 
-/*     return 0; */
-/* } */
+    if ((fp->flag._EOF == 1) || (fp->flag._ERR == 1))
+        return EOF;
+
+    int bufsize;
+    bufsize = (fp->flag._UNBUF) ? 1 : BUFSIZ;
+    if (fp->base == NULL) {     /* no buffer yet */
+        if ((fp->base = (char *) malloc(bufsize)) == NULL)
+            return EOF;         /* can't get buffer */
+    } else {
+        /* if we already had a buffer, write it */
+        write(fp->fd, fp->base, fp->ptr - fp->base);
+        /* todo check for write error */
+        /* todo check for write error */
+        /* todo check for write error */
+        /* todo check for write error */
+    }
+    fp->ptr = fp->base;
+    fp->cnt = bufsize;
+
+    if (c != EOF) {
+        *(fp->ptr++) = (char) c;
+        fp->cnt--;
+    }
+    return (unsigned char) *fp->ptr;
+}
+
+/* fflush:  flush FILE or if NULL, all open FILE buffers */
+int fflush(FILE * stream)
+{
+    /* flush all if no stream provided */
+    if (stream == NULL) {
+        for (int fpn = 0; fpn < OPEN_MAX; fpn++) {
+            /* If the stream argument is NULL, fflush() flushes
+             * all open output streams. */
+            if (_iob[fpn].flag._WRITE)
+                fflush(&_iob[fpn]);
+        }
+        return 0;
+    }
+
+    if (stream->flag._READ)
+        return _fillbuf(stream);
+    else if (stream->flag._WRITE)
+        return _flushbuf(EOF, stream);
+    else
+        return EOF;
+}
 
 #define BOTTOM 1
