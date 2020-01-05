@@ -42,6 +42,7 @@ extern FILE _iob[OPEN_MAX];
 int _fillbuf(FILE * stream);
 int _flushbuf(int, FILE * stream);
 int fflush(FILE * stream);
+int fclose(FILE * stream);
 
 #define    feof(p)     (((p)->flag &_EOF) != 0)
 #define    ferror(p)   (((p)->flag &_ERR) != 0)
@@ -64,16 +65,16 @@ FILE *myfopen(char *name, char *mode);
 int main(int argc, char *argv[])
 {
     FILE *fp;
-    if (argc == 2)
-        fp = myfopen(argv[1], "r");
-    else {
+    if (argc != 2)              /* pass a filename */
         exit(3);
-    }
+
+    fp = myfopen(argv[1], "r");
 
     char c;
     while ((c = getc(fp)) != EOF)
         putc(c, stdout);
     fflush(NULL);
+    fclose(fp);
 }
 
 /* fopen:  open file, return file ptr */
@@ -171,7 +172,7 @@ int _flushbuf(int c, FILE * fp)
     return (unsigned char) *fp->ptr;
 }
 
-/* fflush:  flush FILE or if NULL, all open FILE buffers */
+/* fflush: flush FILE or if NULL, all open FILE buffers */
 int fflush(FILE * stream)
 {
     /* flush all if no stream provided */
@@ -191,6 +192,30 @@ int fflush(FILE * stream)
         return _flushbuf(EOF, stream);
     else
         return EOF;
+}
+
+/* fclose: function flushes the stream pointed to by stream
+* (writing any buffered output data using fflush and closes the
+* underlying file descriptor. */
+int fclose(FILE * stream)
+{
+    if (stream == NULL)
+        return EOF;
+
+    fflush(stream);
+    close(stream->fd);
+    free(stream->base);
+    stream->cnt = 0;
+    stream->ptr = NULL;
+    stream->base = NULL;
+    stream->flag._ERR = 0;
+    stream->flag._EOF = 0;
+    stream->flag._READ = 0;
+    stream->flag._WRITE = 0;
+    stream->flag._UNBUF = 0;
+    stream->fd = 0;
+
+    return 0;
 }
 
 #define BOTTOM 1
