@@ -158,11 +158,8 @@ int _flushbuf(int c, FILE * fp)
             return EOF;         /* can't get buffer */
     } else {
         /* if we already had a buffer, write it */
-        write(fp->fd, fp->base, fp->ptr - fp->base);
-        /* todo check for write error */
-        /* todo check for write error */
-        /* todo check for write error */
-        /* todo check for write error */
+        if (write(fp->fd, fp->base, fp->ptr - fp->base) < 0)
+            fp->flag._ERR = 1;
     }
     fp->ptr = fp->base;
     fp->cnt = bufsize;

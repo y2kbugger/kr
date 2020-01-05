@@ -1,4 +1,4 @@
 file ./testfopen
+set print pretty on
 tui enable
-b main
-run ./test.txt
+start ./test.txt
