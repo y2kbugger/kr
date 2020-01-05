@@ -86,8 +86,8 @@ int main(int argc, char *argv[])
     fseek(fp, 7, SEEK_SET);
     while ((c = getc(fp)) != EOF)
         putc(c, stdout);
-    fclose(fp);
     fflush(stdout);
+    fclose(fp);
 }
 
 /* fopen:  open file, return file ptr */
@@ -239,7 +239,7 @@ int fseek(FILE * fp, long offset, int origin)
 
     if (lseek(fp->fd, offset, origin) < 0)
         return EOF;
-
+    fp->flag._EOF = 0;
     _fillbuf(fp);
     return 0;
 }
