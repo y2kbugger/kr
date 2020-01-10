@@ -9,7 +9,7 @@ set(CMAKE_BUILD_TYPE Debug)
 # add the executable
 add_executable(malloc malloc.c)
 
-set_property(TARGET fsize PROPERTY C_STANDARD 11)
+set_property(TARGET malloc PROPERTY C_STANDARD 11)
 
 
 enable_testing()
