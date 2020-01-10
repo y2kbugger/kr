@@ -35,7 +35,8 @@ void fsize(char *name)
     }
     if ((stbuf.st_mode & S_IFMT) == S_IFDIR)
         dirwalk(name, fsize);
-    printf("%16d %s\n", (int) stbuf.st_size, name);
+    printf("%10ld %8d %s\n", (long) stbuf.st_ino, (int) stbuf.st_size,
+           name);
 }
 
 #define MAX_PATH 1024
