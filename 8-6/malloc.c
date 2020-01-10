@@ -3,6 +3,7 @@
  * calloc, by calling malloc or by modifying it. */
 
 
+#define NULL (void*)0
 
 typedef long Align;             /* for alignment to long boundary */
 
