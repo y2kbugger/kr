@@ -2,10 +2,7 @@
  * to n objects of size size, with the storage initialized to zero. Write
  * calloc, by calling malloc or by modifying it. */
 
-int main()
-{
-    return 0;
-}
+
 
 typedef long Align;             /* for alignment to long boundary */
 
@@ -21,6 +18,13 @@ typedef union header Header;
 
 static Header base;             /* empty list to get started */
 static Header *freep = NULL;    /* start of free list */
+
+void y2kfree(void *ap);
+
+int main()
+{
+    return 0;
+}
 
 /* malloc:  general-purpose storage allocator */
 void *malloc(unsigned nbytes)
@@ -67,13 +71,13 @@ static Header *morecore(unsigned nu)
         return NULL;
     up = (Header *) cp;
     up->s.size = nu;
-    free((void *) (up + 1));
+    y2kfree((void *) (up + 1));
     return freep;
 }
 
 
-/* free:  put block ap in free list */
-void free(void *ap)
+/* y2kfree:  put block ap in free list */
+void y2kfree(void *ap)
 {
     Header *bp, *p;
 
