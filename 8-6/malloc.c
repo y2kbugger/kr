@@ -27,8 +27,8 @@ int main()
     return 0;
 }
 
-/* malloc:  general-purpose storage allocator */
-void *malloc(unsigned nbytes)
+/* y2kmalloc:  general-purpose storage allocator */
+void *y2kmalloc(unsigned nbytes)
 {
     Header *p, *prevp;
     Header *morecore(unsigned);
