@@ -21,10 +21,12 @@ static Header base;             /* empty list to get started */
 static Header *freep = NULL;    /* start of free list */
 static Header *morecore(unsigned);
 
+void *y2kmalloc(unsigned nbytes);
 void y2kfree(void *ap);
 
 int main()
 {
+    y2kmalloc(500000);
     return 0;
 }
 
