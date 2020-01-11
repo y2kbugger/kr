@@ -19,6 +19,7 @@ typedef union header Header;
 
 static Header base;             /* empty list to get started */
 static Header *freep = NULL;    /* start of free list */
+static Header *morecore(unsigned);
 
 void y2kfree(void *ap);
 
@@ -27,11 +28,11 @@ int main()
     return 0;
 }
 
+
 /* y2kmalloc:  general-purpose storage allocator */
 void *y2kmalloc(unsigned nbytes)
 {
     Header *p, *prevp;
-    Header *morecore(unsigned);
     unsigned nunits;
 
     nunits = (nbytes + sizeof(Header) - 1) / sizeof(Header) + 1;
