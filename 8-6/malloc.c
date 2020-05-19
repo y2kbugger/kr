@@ -60,6 +60,19 @@ void *y2kmalloc(unsigned nbytes)
     }
 }
 
+#include <limits.h>
+/* y2kcalloc:  general-purpose storage allocator */
+void *y2kcalloc(unsigned int n, unsigned int nbytes)
+{
+    if ((n == 0) || (nbytes == 0))
+        return NULL;
+    unsigned int mallocbytes;
+    if (__builtin_umul_overflow(n, nbytes, &mallocbytes))
+        return NULL;
+    else
+        return y2kmalloc(n * nbytes);
+}
+
 #define    NALLOC    1024       /* minimum #units to request */
 
 /* morecore:  ask system for more memory */
