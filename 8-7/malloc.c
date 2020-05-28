@@ -24,9 +24,11 @@ static Header *morecore(unsigned);
 void *y2kmalloc(unsigned nbytes);
 void y2kfree(void *ap);
 
+const int MALLOCSIZE = 500000;
+
 int main()
 {
-    y2kmalloc(500000);
+    y2kmalloc(4000);
     return 0;
 }
 
@@ -34,6 +36,12 @@ int main()
 /* y2kmalloc:  general-purpose storage allocator */
 void *y2kmalloc(unsigned nbytes)
 {
+    if (nbytes == 0) {
+        return NULL;
+    }
+    if (nbytes > MALLOCSIZE) {
+        return NULL;
+    }
     Header *p, *prevp;
     unsigned nunits;
 
