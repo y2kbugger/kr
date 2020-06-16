@@ -107,6 +107,12 @@ void y2kfree(void *ap)
     Header *bp, *p;
 
     bp = (Header *) ap - 1;     /* point to block header */
+    if (bp == NULL) {
+        return;
+    }
+    if (bp->s.size == 0) {
+        return;
+    }
     for (p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
         if (p >= p->s.ptr && (bp > p || bp < p->s.ptr))
             break;              /* freed block at start or end of arena */
